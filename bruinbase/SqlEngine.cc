@@ -130,9 +130,21 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   return rc;
 }
 
+//Project 2A
+/*Opens the input loadfile and the RecordFile
+  Parses each line of the loadfile to read a tuple (use SqlEngine::parseLoadLine())
+  Insert the tuple to the RecordFile
+*/
 RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 {
-  /* your code here */
+  //For now, assume index is always FALSE
+
+  //Reading the loadfile
+
+  //Storing the table
+  //MUST USE RecordFile class
+  //Should be named as tablename + ".tbl"
+  //Example: "LOAD movie FROM 'movieData.del'" -> Creates movie.tbl
 
   return 0;
 }
