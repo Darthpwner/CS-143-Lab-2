@@ -140,34 +140,36 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 {
   //Local variable declarations (look at select function as an example)
-  RC rc;
+  RC rc;  //RC means error code
   RecordFile rf;   // RecordFile containing the table
   RecordId   rid;  // record cursor for table scanning
 
   //Key value pair stored at each record
-  int    key; //integer
-  string value; //string
+  string line;  //A line from a load file (string)
+  int    key; //The key field of the tuple in the line (integer)
+  string value; //THe value field of the tuple in the line (string)
 
-  //For now, assume index is always FALSE
+  //For Part A, assume index is always FALSE
 
   //Use any standard C++ file I/O functions to read the loadfile i.e. fstream
   //fstream readLoadFile = loadfile(c_str());
-  ifstream tableData(loadfile.c_str()); //Why does this work vs fstream
+  ifstream tableData(loadfile.c_str()); //c_str() converts the string into a C-string that is has a zero byte at the end
 
-  //Reading the loadfile
-  //src.read(rid, -69, loadfile);  //Wrong type
+  if(!tableData.is_open()) {  //If tableData cannot be opened, return an error code
+    fprintf(stderr, "Error: table %s does not exist\n", table.c_str());
+  }
 
-// int* x;
-// int y = 5;
-// x = &y;
+  //
+  rc = rf.open(table + ".tbl", 'w');
 
-//   //Storing the table
-//   //MUST USE RecordFile class
-//   //Should be named as tablename + ".tbl"
-//   //Example: "LOAD movie FROM 'movieData.del'" -> Creates movie.tbl
-//   //for(int i = 0; i < rc.endRid(); i++) { //Parse until end of the file
-//       parseLoadLine("Hi", x, "Bye");  //Arbitrary teest
-//   //} 
+  while(getline(tableData, line)) {
+    parseLoadLine(line, key, value);  //
+    rc = rf.append(key, value, rid);  //append takes in three parameters: (1)key - the record key, (2) value - the record value, (3) rid - the location of the stored record
+  }
+
+  //Close
+  rf.close();
+  tableData.close();
 
   return rc;
 }
