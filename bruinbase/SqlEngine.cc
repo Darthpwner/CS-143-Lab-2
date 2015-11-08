@@ -131,12 +131,16 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 }
 
 //How to verify we are right, make sure that "select * from movie" in Bruinbase produces the same result as "load movie from 'movie.del'"
+//We could also run a diff command between the two files
 
 //Project 2A
 /*Opens the input loadfile and the RecordFile
   Parses each line of the loadfile to read a tuple (use SqlEngine::parseLoadLine())
   Insert the tuple to the RecordFile
 */
+//table[IN] - the table name in the LOAD command
+//loadfile[IN] - the file name of the load file
+//index[IN] - true if "WITH INDEX" option was specified
 RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 {
   //Local variable declarations (look at select function as an example)
@@ -147,33 +151,38 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   //Key value pair stored at each record
   string line;  //A line from a load file (string)
   int    key; //The key field of the tuple in the line (integer)
-  string value; //THe value field of the tuple in the line (string)
+  string value; //The value field of the tuple in the line (string)
 
   //For Part A, assume index is always FALSE
 
   //Use any standard C++ file I/O functions to read the loadfile i.e. fstream
-  //fstream readLoadFile = loadfile(c_str());
+  //ifstream is limits the I/O to input only
   ifstream tableData(loadfile.c_str()); //c_str() converts the string into a C-string that is has a zero byte at the end
 
-  if(!tableData.is_open()) {  //If tableData cannot be opened, return an error code
+  if(!tableData.is_open()) {  //If tableData cannot be opened, return an error message
     fprintf(stderr, "Error: table %s does not exist\n", table.c_str());
+    return rc;  //Return the default value of rc
   }
 
-  //
-  rc = rf.open(table + ".tbl", 'w');
+  //Create an empty file with the "table" variable as the name with the .tbl suffix  
+  rc = rf.open(table + ".tbl", 'w');  //If file does not exist in 'w' mode, it is created and stored into rc
 
+  //Loop while we still have lines in tableData (indicated by \n) and stop when we reach the zero byte (\0)
   while(getline(tableData, line)) {
-    parseLoadLine(line, key, value);  //
-    rc = rf.append(key, value, rid);  //append takes in three parameters: (1)key - the record key, (2) value - the record value, (3) rid - the location of the stored record
-  }
+    parseLoadLine(line, key, value);  //Parses each line of the loadfile to read a tuple
+    rc = rf.append(key, value, rid);  //Append the records to the load file to the end of the table
 
-  //Close
+  //Close the Record File and the table to prevent unexpected bugs after using it.
   rf.close();
   tableData.close();
 
   return rc;
 }
 
+//Parse a line from the load file into the (key, value) pair
+//line[IN] - a line from a load file
+//key[OUT] - the key field fo the tuple in the line
+//value[OUT] - the value file do fthe tuple in the line
 RC SqlEngine::parseLoadLine(const string& line, int& key, string& value)
 {
     const char *s;
