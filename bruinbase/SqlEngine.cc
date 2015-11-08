@@ -171,7 +171,8 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   while(getline(tableData, line)) {
     parseLoadLine(line, key, value);  //Parses each line of the loadfile to read a tuple
     rc = rf.append(key, value, rid);  //Append the records to the load file to the end of the table
-
+  }
+  
   //Close the Record File and the table to prevent unexpected bugs after using it.
   rf.close();
   tableData.close();
