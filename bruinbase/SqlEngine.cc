@@ -144,6 +144,9 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   RecordFile rf;   // RecordFile containing the table
   RecordId   rid;  // record cursor for table scanning
 
+  int    key; //integer
+  string value; //string
+
   //For now, assume index is always FALSE
 
   //Reading the loadfile
@@ -161,7 +164,7 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 //       parseLoadLine("Hi", x, "Bye");  //Arbitrary teest
 //   //} 
 
-  return 0;
+  return rc;
 }
 
 RC SqlEngine::parseLoadLine(const string& line, int& key, string& value)
