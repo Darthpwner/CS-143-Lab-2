@@ -147,14 +147,17 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   //Reading the loadfile
   //src.read(rid, -69, loadfile);  //Wrong type
 
+// int* x;
+// int y = 5;
+// x = &y;
 
-  //Storing the table
-  //MUST USE RecordFile class
-  //Should be named as tablename + ".tbl"
-  //Example: "LOAD movie FROM 'movieData.del'" -> Creates movie.tbl
-  //for(int i = 0; i < rc.endRid(); i++) { //Parse until end of the file
-      parseLoadLine("Hi", -69, "Bye");  //Arbitrary teest
-  //} 
+//   //Storing the table
+//   //MUST USE RecordFile class
+//   //Should be named as tablename + ".tbl"
+//   //Example: "LOAD movie FROM 'movieData.del'" -> Creates movie.tbl
+//   //for(int i = 0; i < rc.endRid(); i++) { //Parse until end of the file
+//       parseLoadLine("Hi", x, "Bye");  //Arbitrary teest
+//   //} 
 
   return 0;
 }
