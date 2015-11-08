@@ -144,10 +144,15 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   RecordFile rf;   // RecordFile containing the table
   RecordId   rid;  // record cursor for table scanning
 
+  //Key value pair stored at each record
   int    key; //integer
   string value; //string
 
   //For now, assume index is always FALSE
+
+  //Use any standard C++ file I/O functions to read the loadfile i.e. fstream
+  //fstream readLoadFile = loadfile(c_str());
+  ifstream tableData(loadfile.c_str()); //Why does this work vs fstream
 
   //Reading the loadfile
   //src.read(rid, -69, loadfile);  //Wrong type
