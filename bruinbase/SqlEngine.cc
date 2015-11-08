@@ -130,6 +130,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   return rc;
 }
 
+//How to verify we are right, make sure that "select * from movie" in Bruinbase produces the same result as "load movie from 'movie.del'"
+
 //Project 2A
 /*Opens the input loadfile and the RecordFile
   Parses each line of the loadfile to read a tuple (use SqlEngine::parseLoadLine())
