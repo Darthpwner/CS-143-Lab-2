@@ -137,14 +137,22 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 */
 RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 {
+  RC rc;
+  RecordId rid;
+
   //For now, assume index is always FALSE
 
   //Reading the loadfile
+  rc.read(rid, -69, loadfile);
+
 
   //Storing the table
   //MUST USE RecordFile class
   //Should be named as tablename + ".tbl"
   //Example: "LOAD movie FROM 'movieData.del'" -> Creates movie.tbl
+  for(int i = 0; i < rc.endRid(); i++) { //Parse until end of the file
+      parseLoadLine("Hi", -69, "Bye");  //Arbitrary teest
+  } 
 
   return 0;
 }
