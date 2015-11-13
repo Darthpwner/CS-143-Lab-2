@@ -13,8 +13,7 @@ BTLeafNode::BTLeafNode() {
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::read(PageId pid, const PageFile& pf) { 
-	pf.read(pid, buffer);	//Reads the PageFile using its implementation
-	return 0;
+	return pf.read(pid, buffer);	//Reads the PageFile using its implementation, returns 0 on success or error code on an error.
 }
     
 /*
@@ -24,8 +23,7 @@ RC BTLeafNode::read(PageId pid, const PageFile& pf) {
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::write(PageId pid, PageFile& pf) { 
-	pf.write(pid, buffer);	//Writes the PageFile using its implementation
-	return 0; 
+	return pf.write(pid, buffer);	//Writes the PageFile using its implementation, returns 0 on success or error code on an error.
 }
 
 /*
