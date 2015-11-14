@@ -92,6 +92,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
  */
 PageId BTLeafNode::getNextNodePtr() { 
 	PageId nextPid = 0;	//Default pid is 0 if we do not find the next sibling node
+	
 	char* tempBuffer = buffer;
 
 	/*memcpy
