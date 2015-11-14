@@ -36,7 +36,7 @@ RC BTLeafNode::write(PageId pid, PageFile& pf) {
 int BTLeafNode::getKeyCount() {
 	//
 	int keyCount = 0;
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
 	//Need 1024 bytes of main memory to "load" the content of the node from the disk
@@ -71,7 +71,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 	}
 
 	//Temporary buffer holds the buffer's original stored keys and manipulates how to add a new key.
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	//Otherwise, go through the buffer's keys to see where to store the new node
 	int i = 0;
@@ -196,7 +196,7 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 RC BTLeafNode::locate(int searchKey, int& eid) {
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	//Loop through all the indices in the tempBuffer and incremeny by 12 bytes to jump to the next key
 	int i = 0;
@@ -235,7 +235,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
 	//Position in bytes of the entry
 	int byteIndex = eid * PAIR_SIZE;
 
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	//Copy the data into parameters
 	memcpy(&key, tempBuffer + byteIndex, sizeof(int));
@@ -251,7 +251,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
 PageId BTLeafNode::getNextNodePtr() {
 	PageId nextPid = 0;	//Default pid is 0 if we do not find the next sibling node
 
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	/*memcpy
 	* void* destination
@@ -274,7 +274,7 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 		return RC_INVALID_PID;
 	}
 
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	//Copy the pid parameter into our tempBuffer
 	memcpy(tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), &pid, sizeof(PageId));
@@ -287,7 +287,7 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
  *   Print the keys of the node
 */
 void BTLeafNode::print() {
-	char* tempBuffer = buffer;
+	tempBuffer = buffer;
 
 	for(int i = 0; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
 		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair

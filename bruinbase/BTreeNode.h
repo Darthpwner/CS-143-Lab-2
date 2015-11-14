@@ -113,6 +113,8 @@ class BTLeafNode {
 
   private:
     int numKeys;
+
+    char* tempBuffer;   /*Temporary buffer to hold values from buffer*/
    /**
     * The main memory buffer for loading the content of the disk page
     * that contains the node.
