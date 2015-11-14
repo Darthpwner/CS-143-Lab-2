@@ -39,7 +39,7 @@ int BTLeafNode::getKeyCount() {
 
 	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
 	//Need 1024 bytes of main memory to "load" the content of the node from the disk
-	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+	for(int i = 0; i < PageFile::PAGE_SIZE; i += PAIR_SIZE) {
 		if(*tempBuffer == 0) {	//Element of tempBuffer's index has a 0 value meaning we do not have a key here
 			break;
 		}
@@ -63,7 +63,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 
 	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
 	//We can fit 1024/12 == 85 with 4 bytes left over
-	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId) / PAIR_SIZE);
+	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
 	if(getKeyCount() + 1 > numberOfTotalPairs) {	//Return an error code if the null is full.
 		return RC_NODE_FULL;
 	}
@@ -72,7 +72,8 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 	char* tempBuffer = buffer;
 
 	//Otherwise, go through the buffer's keys to see where to store the new node
-	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+	int i = 0;
+	for(; i < PageFile::PAGE_SIZE; i += PAIR_SIZE) {
 		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
 		if(*tempBuffer == 0 || key < tempBuffer[i]) {
 			break;
@@ -80,6 +81,34 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 
 		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
 	}
+
+	//After we perform our check to see for free space, index i has the appropriate index of where to insert the pair
+	char* newBuffer = (char*) malloc (PageFile::PAGE_SIZE);
+	fill(newBuffer, newBuffer + PageFile::PAGE_SIZE, 0);	//Clear the buffer as appropriate
+
+	//Copy all values from buffer into new Buffer up until i
+	memcpy(newBuffer, buffer, i);
+
+	//Values to insert as new (key, rid) pair
+	PageId pid = rid.sid;
+	int sid = rid.sid;
+	
+	memcpy(newBuffer + i, &key, sizeof(int));
+	memcpy(newBuffer + i + sizeof(int), &rid, sizeof(RecordId));
+
+	//The remaining memcpy operations will copy the remaining values into newBuffer
+	//Neglecting the results of nextNodePtr. This needs to be manually copied in!
+	memcpy(newBuffer + i + PAIR_SIZE, buffer + i, getKeyCount() * PAIR_SIZE - i);
+	memcpy(newBuffer + PageFile::PAGE_SIZE - sizeof(PageId), &nextNodePtr, sizeof(PageId));
+
+	//Copy the newBuffer into buffer, then delete temporary newBuffer to prevent any memory leaks
+	memcpy(buffer, newBuffer, PageFile::PAGE_SIZE);
+	free(newBuffer);
+
+	//Successively inserted leaf node, so we increment number of keys
+	numKeys++;
+
+	return 0;
 }
 
 /*
@@ -94,6 +123,50 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
  */
 RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
                               BTLeafNode& sibling, int& siblingKey) {
+	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
+	PageId nextNodePtr = getNextNodePtr();
+
+	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
+
+	//Only split the node if inserting causes an overflow. Return an error otherwise
+	if(getKeyCount() <= numberOfTotalPairs) {
+		return RC_INVALID_FILE_FORMAT;
+	}
+
+	//If sibling node is not empty, return error
+	if(sibling.getKeyCount() != 0) {
+		return RC_INVALID_ATTRIBUTE;
+	}
+
+	//Clear sibling buffer just in case
+	fill(sibling.buffer, sibling.buffer + PageFile::PAGE_SIZE, 0);	//Clear the buffer if necessary
+
+	//Calculate the keys to remain in the first half
+	int numHalfKeys = ((int) (getKeyCount() + 1) / 2);
+
+	//Get the halfway index where we split the node block
+	int indexAtHalf = numHalfKeys * PAIR_SIZE;
+
+	//Copy everything from the right side of the halfIndex into our sibling's buffer except the pid
+	memcpy(sibling.buffer, buffer + indexAtHalf, PageFile::PAGE_SIZE - sizeof(PageId) - indexAtHalf);
+
+	//Update sibling's number of keys and set pid to current node's pid ptr
+	sibling.numKeys = getKeyCount() - numHalfKeys;
+	sibling.setNextNodePtr(getNextNodePtr());
+
+	//Clear the 2nd half of the current buffer except for the pid and then update the keys
+	fill(buffer + indexAtHalf, buffer + PageFile::PAGE_SIZE - sizeof(PageId), 0);
+	numKeys = numHalfKeys;
+
+	//Check which buffer to put the new (key, rid) pair in
+	int firstHalfKeyVal;
+	memcpy(&firstHalfKeyVal, sibling.buffer, sizeof(int));	
+
+	//Insert pair and increment number of keys
+	if(key >= firstHalfKeyVal) {
+		
+	}
+
 	return 0;
 }
 
