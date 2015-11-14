@@ -18,17 +18,13 @@
  */
 class BTLeafNode {
   public:
-    static const int MIN_NUM_KEYS = 70;
-    static const int BUFFER_SIZE = 1024;
     static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
-    static const int MAX_NUM_LEAF_NODES = BUFFER_SIZE / PAIR_SIZE;  //1024  / 12 = 85
+    static const int NUM_OF_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId) )/ PAIR_SIZE;
 
     /*
     * Constructor that sets numKeys to 0
     */
     BTLeafNode();
-
-
 
    /**
     * Insert the (key, rid) pair to the node.
@@ -209,6 +205,9 @@ class BTNonLeafNode {
 
   private:
     int numKeys; /* declare the variables that a NONLEAF must hold */
+
+    //char* tempBuffer;   /*Temporary buffer used to store data from the buffer array*/
+
    /**
     * The main memory buffer for loading the content of the disk page
     * that contains the node.
