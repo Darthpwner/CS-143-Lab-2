@@ -118,6 +118,11 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+    /**
+     * Constructor for NONLEAF node; initialize the private variables
+     */
+    BTNonLeafNode();
+
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -183,7 +188,7 @@ class BTNonLeafNode {
     RC write(PageId pid, PageFile& pf);
 
   private:
-    int numKeys; 
+    int numKeys; /* declare the variables that a NONLEAF must hold */
    /**
     * The main memory buffer for loading the content of the disk page
     * that contains the node.
