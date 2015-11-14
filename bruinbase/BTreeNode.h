@@ -18,10 +18,14 @@
  */
 class BTLeafNode {
   public:
+    static const int MIN_NUM_KEYS = 70; 
+
     /*
     * Constructor that sets numKeys to 0
     */
     BTLeafNode();
+
+
 
    /**
     * Insert the (key, rid) pair to the node.
@@ -102,6 +106,11 @@ class BTLeafNode {
     * @return 0 if successful. Return an error code if there is an error.
     */
     RC write(PageId pid, PageFile& pf);
+
+    /*
+    *   Print the keys of the node
+    */
+    void print();
 
   private:
     int numKeys;

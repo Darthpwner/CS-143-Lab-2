@@ -1,5 +1,6 @@
 #include "BTreeNode.h"
 #include <cstdlib>
+#include <iostream>
 #include "string.h"
 using namespace std;
 
@@ -118,13 +119,28 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 
 	char* tempBuffer = buffer;
 
-	//Cop the pid parameter into our tempBuffer
+	//Copy the pid parameter into our tempBuffer
 	memcpy(tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), &pid, sizeof(PageId));
 
 	//Return 0 if successful.
 	return 0;
 }
 
+/*
+ *   Print the keys of the node
+*/
+void BTLeafNode::print() {
+	//This is the size in bytes of an empty pair
+	int pairSize = sizeof(RecordId) + sizeof(int);
+
+	char* tempBuffer = buffer;
+
+	for(int i = 0; i < getKeyCount() * pairSize; i += pairSize) {
+		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair
+	} 
+
+	cout << endl;
+}
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
