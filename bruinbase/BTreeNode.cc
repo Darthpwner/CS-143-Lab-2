@@ -110,7 +110,9 @@ PageId BTLeafNode::getNextNodePtr() {
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::setNextNodePtr(PageId pid) {
- return 0; 
+	if(pid < 0) {
+		return RC_INVALID_PID;
+	}
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------
