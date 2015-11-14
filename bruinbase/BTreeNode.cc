@@ -33,6 +33,22 @@ RC BTLeafNode::write(PageId pid, PageFile& pf) {
  * @return the number of keys in the node
  */
 int BTLeafNode::getKeyCount() {
+	//
+	int pairSize = sizeof(RecordId) + sizeof(int);
+	int keyCount = 0;
+	char* tempBuffer = buffer;
+
+	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
+	//Need 1024 bytes of main memory to "load" the content of the node from the disk
+	for(int i = 0; i < BUFFER_SIZE; i += pairSize) {
+		if(*tempBuffer == 0) {	//Element of tempBuffer's index has a 0 value meaning we do not have a key here
+			break;
+		}
+		keyCount++;	//Increment count whenever we can move down the bugger
+
+		tempBuffer += pairSize;	//Jump to the next key in the temporary buffer
+	}
+
 	return 0;
 }
 

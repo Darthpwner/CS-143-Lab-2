@@ -19,6 +19,7 @@
 class BTLeafNode {
   public:
     static const int MIN_NUM_KEYS = 70; 
+    static const int BUFFER_SIZE = 1024;
 
     /*
     * Constructor that sets numKeys to 0
