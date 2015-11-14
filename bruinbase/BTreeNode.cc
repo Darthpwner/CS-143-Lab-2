@@ -68,9 +68,17 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 		return RC_NODE_FULL;
 	}
 
+	//Temporary buffer holds the buffer's original stored keys and manipulates how to add a new key.
+	char* tempBuffer = buffer;
+
 	//Otherwise, go through the buffer's keys to see where to store the new node
 	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
+		if(*tempBuffer == 0 || key < tempBuffer[i]) {
+			break;
+		}
 
+		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
 	}
 }
 
