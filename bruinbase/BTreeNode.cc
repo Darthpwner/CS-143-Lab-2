@@ -113,6 +113,12 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 	if(pid < 0) {
 		return RC_INVALID_PID;
 	}
+
+	char* tempBuffer = buffer;
+
+	memcpy(tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), &pid, sizeof(PageId));
+
+	return 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------
