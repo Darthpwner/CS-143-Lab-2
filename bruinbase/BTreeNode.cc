@@ -66,7 +66,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 
 	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
 	//We can fit 1024/12 == 85 with 4 bytes left over
-	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
+	int numberOfTotalPairs = NUM_OF_TOTAL_PAIRS;
 	if(getKeyCount() + 1 > numberOfTotalPairs) {	//Return an error code if the null is full.
 		return RC_NODE_FULL;
 	}
