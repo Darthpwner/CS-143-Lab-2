@@ -21,6 +21,7 @@ class BTLeafNode {
     static const int MIN_NUM_KEYS = 70; 
     static const int BUFFER_SIZE = 1024;
     static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
+    static const int MAX_NUM_LEAF_NODES = BUFFER_SIZE / PAIR_SIZE;  //1024  / 12 = 85
 
     /*
     * Constructor that sets numKeys to 0

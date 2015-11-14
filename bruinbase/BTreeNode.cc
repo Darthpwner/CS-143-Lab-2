@@ -60,6 +60,18 @@ int BTLeafNode::getKeyCount() {
 RC BTLeafNode::insert(int key, const RecordId& rid) {
 	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
 	PageId nextNodePtr = getNextNodePtr();
+
+	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
+	//We can fit 1024/12 == 85 with 4 bytes left over
+	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId) / PAIR_SIZE);
+	if(getKeyCount() + 1 > numberOfTotalPairs) {	//Return an error code if the null is full.
+		return RC_NODE_FULL;
+	}
+
+	//Otherwise, go through the buffer's keys to see where to store the new node
+	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+
+	}
 }
 
 /*
