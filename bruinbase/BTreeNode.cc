@@ -7,6 +7,7 @@ using namespace std;
 
 BTLeafNode::BTLeafNode() {
 	numKeys = 0;
+	tempBuffer = buffer;
 }
 
 /*
@@ -62,7 +63,7 @@ int BTLeafNode::getKeyCount() {
  */
 RC BTLeafNode::insert(int key, const RecordId& rid) {
 	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
-	PageId nextNodePtr = getNextNodePtr();
+	nextNodePtr = getNextNodePtr();
 
 	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
 	//We can fit 1024/12 == 85 with 4 bytes left over
@@ -129,7 +130,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
                               BTLeafNode& sibling, int& siblingKey) {
 	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
-	PageId nextNodePtr = getNextNodePtr();
+	nextNodePtr = getNextNodePtr();
 
 	//Only split the node if inserting causes an overflow. Return an error otherwise
 	if(getKeyCount() <= NUM_OF_TOTAL_PAIRS) {
@@ -249,7 +250,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
  * @return the PageId of the next sibling node
  */
 PageId BTLeafNode::getNextNodePtr() {
-	PageId nextPid = 0;	//Default pid is 0 if we do not find the next sibling node
+	nextNodePtr = 0;	//Default pid is 0 if we do not find the next sibling node
 
 	tempBuffer = buffer;
 
@@ -258,9 +259,9 @@ PageId BTLeafNode::getNextNodePtr() {
 	* const void* source
 	* size_t num
 	*/
-	memcpy(&nextPid, tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), sizeof(PageId));	//Go to the last PageId section of the buffer and copy the information to the nextPid variable
+	memcpy(&nextNodePtr, tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), sizeof(PageId));	//Go to the last PageId section of the buffer and copy the information to the nextPid variable
 
-	return nextPid;
+	return nextNodePtr;
 }
 
 /*

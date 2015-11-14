@@ -112,9 +112,10 @@ class BTLeafNode {
     void print();
 
   private:
-    int numKeys;
-
+    int numKeys;    /*Number of keys that a leaf can hold*/
     char* tempBuffer;   /*Temporary buffer to hold values from buffer*/
+    PageId nextNodePtr; /*Next node pointer for the inserted leaf node*/
+
    /**
     * The main memory buffer for loading the content of the disk page
     * that contains the node.
