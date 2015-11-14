@@ -97,7 +97,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 	//Values to insert as new (key, rid) pair
 	PageId pid = rid.sid;
 	int sid = rid.sid;
-	
+
 	memcpy(newBuffer + i, &key, sizeof(int));
 	memcpy(newBuffer + i + sizeof(int), &rid, sizeof(RecordId));
 
@@ -165,12 +165,12 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 
 	//Check which buffer to put the new (key, rid) pair in
 	int firstHalfKeyVal;
-	memcpy(&firstHalfKeyVal, sibling.buffer, sizeof(int));	
+	memcpy(&firstHalfKeyVal, sibling.buffer, sizeof(int));
 
 	//Insert pair and increment number of keys
 	if(key >= firstHalfKeyVal) {	//In this case, the key belongs in the 2nd buffer of our sorted B+ tree
 		sibling.insert(key, rid);
-	} else {	//Otherwise, place it in the 1st buffer 
+	} else {	//Otherwise, place it in the 1st buffer
 		insert(key, rid);
 	}
 
