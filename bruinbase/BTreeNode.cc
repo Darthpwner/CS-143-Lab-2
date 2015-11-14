@@ -8,6 +8,7 @@ using namespace std;
 BTLeafNode::BTLeafNode() {
 	numKeys = 0;
 	tempBuffer = buffer;
+	nextNodePtr = 0;
 }
 
 /*
