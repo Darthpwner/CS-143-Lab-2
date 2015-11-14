@@ -197,6 +197,11 @@ class BTNonLeafNode {
     */
     RC write(PageId pid, PageFile& pf);
 
+    /**
+     * Print the keys of the node to cout
+     */
+     void print();
+
   private:
     int numKeys; /* declare the variables that a NONLEAF must hold */
    /**
