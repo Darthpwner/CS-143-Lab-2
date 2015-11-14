@@ -41,8 +41,8 @@ int BTLeafNode::getKeyCount() {
 	tempBuffer = buffer;
 
 	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
-	//Need 1024 bytes of main memory to "load" the content of the node from the disk
-	for(int i = 0; i < PageFile::PAGE_SIZE; i += PAIR_SIZE) {
+	//Largest value at which we can add a new key is 1008, so we loop until we reach index 1008
+	for(int i = 0; i < LARGEST_INDEX; i += PAIR_SIZE) {
 		int key;
 		memcpy(&key, tempBuffer, sizeof(int));	//Save the key inside the tempBuffer
 		if(key == 0) {	//Key of value 0 indicates we do not have a key here
@@ -134,7 +134,7 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 	nextNodePtr = getNextNodePtr();
 
 	//Only split the node if inserting causes an overflow. Return an error otherwise
-	if(getKeyCount() <= NUM_OF_TOTAL_PAIRS) {
+	if(getKeyCount() < NUM_OF_TOTAL_PAIRS) {
 		return RC_INVALID_FILE_FORMAT;
 	}
 
