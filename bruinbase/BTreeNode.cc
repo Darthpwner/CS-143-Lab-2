@@ -131,10 +131,8 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
 	PageId nextNodePtr = getNextNodePtr();
 
-	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
-
 	//Only split the node if inserting causes an overflow. Return an error otherwise
-	if(getKeyCount() <= numberOfTotalPairs) {
+	if(getKeyCount() <= NUM_OF_TOTAL_PAIRS) {
 		return RC_INVALID_FILE_FORMAT;
 	}
 
