@@ -1,5 +1,6 @@
 #include "BTreeNode.h"
 #include <cstdlib>
+#include <iostream>
 #include "string.h"
 #include <iostream>
 using namespace std;
@@ -33,7 +34,22 @@ RC BTLeafNode::write(PageId pid, PageFile& pf) {
  * @return the number of keys in the node
  */
 int BTLeafNode::getKeyCount() {
-	return 0;
+	//
+	int keyCount = 0;
+	char* tempBuffer = buffer;
+
+	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
+	//Need 1024 bytes of main memory to "load" the content of the node from the disk
+	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+		if(*tempBuffer == 0) {	//Element of tempBuffer's index has a 0 value meaning we do not have a key here
+			break;
+		}
+		keyCount++;	//Increment count whenever we can move down the bugger
+
+		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
+	}
+
+	return keyCount;
 }
 
 /*
@@ -43,7 +59,28 @@ int BTLeafNode::getKeyCount() {
  * @return 0 if successful. Return an error code if the node is full.
  */
 RC BTLeafNode::insert(int key, const RecordId& rid) {
-	return 0;
+	//Save the last 4 bytes (the pid) for reconstructing the inserted leaf node
+	PageId nextNodePtr = getNextNodePtr();
+
+	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
+	//We can fit 1024/12 == 85 with 4 bytes left over
+	int numberOfTotalPairs = (PageFile::PAGE_SIZE - sizeof(PageId) / PAIR_SIZE);
+	if(getKeyCount() + 1 > numberOfTotalPairs) {	//Return an error code if the null is full.
+		return RC_NODE_FULL;
+	}
+
+	//Temporary buffer holds the buffer's original stored keys and manipulates how to add a new key.
+	char* tempBuffer = buffer;
+
+	//Otherwise, go through the buffer's keys to see where to store the new node
+	for(int i = 0; i < BUFFER_SIZE; i += PAIR_SIZE) {
+		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
+		if(*tempBuffer == 0 || key < tempBuffer[i]) {
+			break;
+		}
+
+		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
+	}
 }
 
 /*
@@ -93,6 +130,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
  */
 PageId BTLeafNode::getNextNodePtr() {
 	PageId nextPid = 0;	//Default pid is 0 if we do not find the next sibling node
+
 	char* tempBuffer = buffer;
 
 	/*memcpy
@@ -106,13 +144,8 @@ PageId BTLeafNode::getNextNodePtr() {
 }
 
 /*
-<<<<<<< HEAD
  * Set the pid of the next slibling node.
  * @param pid[IN] the PageId of the next sibling node
-=======
- * Set the pid of the next sibling node.
- * @param pid[IN] the PageId of the next sibling node
->>>>>>> e4a71a743f5fde1e7bdf0c5a9b38283c426fc451
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::setNextNodePtr(PageId pid) {
@@ -123,13 +156,27 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 
 	char* tempBuffer = buffer;
 
-	//Cop the pid parameter into our tempBuffer
+	//Copy the pid parameter into our tempBuffer
 	memcpy(tempBuffer + PageFile::PAGE_SIZE-sizeof(PageId), &pid, sizeof(PageId));
 
 	//Return 0 if successful.
 	return 0;
 }
 
+/*
+ *   Print the keys of the node
+*/
+void BTLeafNode::print() {
+	char* tempBuffer = buffer;
+
+	for(int i = 0; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
+		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair
+
+		tempBuffer += PAIR_SIZE;	//tempBuffer jumps to the next key
+	}
+
+	cout << endl;
+}
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
