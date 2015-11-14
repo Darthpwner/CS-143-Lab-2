@@ -164,10 +164,21 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 	memcpy(&firstHalfKeyVal, sibling.buffer, sizeof(int));	
 
 	//Insert pair and increment number of keys
-	if(key >= firstHalfKeyVal) {
-		
+	if(key >= firstHalfKeyVal) {	//In this case, the key belongs in the 2nd buffer of our sorted B+ tree
+		sibling.insert(key, rid);
+	} else {	//Otherwise, place it in the 1st buffer 
+		insert(key, rid);
 	}
 
+	//Copy over sibling's 1st key and rid
+	memcpy(&siblingKey, sibling.buffer, sizeof(int));
+
+	RecordId siblingRid;
+	siblingRid.pid = -1;
+	siblingRid.sid = -1;
+	memcpy(&siblingRid, sibling.buffer + sizeof(int), sizeof(RecordId));
+
+	//Leave next node pointer alone because changing it will destroy the index tree's leaf node mapping
 	return 0;
 }
 
