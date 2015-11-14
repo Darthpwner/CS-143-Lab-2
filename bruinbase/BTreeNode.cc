@@ -41,7 +41,9 @@ int BTLeafNode::getKeyCount() {
 	//Loop through all indices in the tempBuffer, increment by 12 bytes to go to the next key
 	//Need 1024 bytes of main memory to "load" the content of the node from the disk
 	for(int i = 0; i < PageFile::PAGE_SIZE; i += PAIR_SIZE) {
-		if(*tempBuffer == 0) {	//Element of tempBuffer's index has a 0 value meaning we do not have a key here
+		int key;
+		memcpy(&key, tempBuffer, sizeof(int));	//Save the key inside the tempBuffer
+		if(key == 0) {	//Key of value 0 indicates we do not have a key here
 			break;
 		}
 		keyCount++;	//Increment count whenever we can move down the bugger
@@ -75,8 +77,11 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 	//Otherwise, go through the buffer's keys to see where to store the new node
 	int i = 0;
 	for(; i < PageFile::PAGE_SIZE; i += PAIR_SIZE) {
+		int insertKey;
+		memcpy(&insertKey, tempBuffer, sizeof(int));	//Save the insertKey inside tempBuffer
+
 		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
-		if(*tempBuffer == 0 || key < tempBuffer[i]) {
+		if(insertKey == 0 || key < insertKey) {
 			break;
 		}
 
@@ -194,6 +199,26 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 RC BTLeafNode::locate(int searchKey, int& eid) {
+	char* tempBuffer = buffer;
+
+	//Loop through all the indices in the tempBuffer and incremeny by 12 bytes to jump to the next key
+	int i = 0;
+	for(; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
+		int key;
+		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key inside buffer
+
+		//If the key is larger than or equal to the searchKey, set eid
+		if(key >= searchKey) {
+			//eid = current byte index divided by size of a pair entry
+			eid = i/PAIR_SIZE;
+			return 0;
+		}
+
+		tempBuffer += PAIR_SIZE;
+	}
+
+	//If we reach this point
+	eid = getKeyCount();
 	return 0;
 }
 
@@ -205,6 +230,20 @@ RC BTLeafNode::locate(int searchKey, int& eid) {
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid) {
+	//If eid is out of bounds, return an error code
+	if(eid >= getKeyCount() || eid < 0) {
+		return RC_NO_SUCH_RECORD;
+	}
+
+	//Position in bytes of the entry
+	int byteIndex = eid * PAIR_SIZE;
+
+	char* tempBuffer = buffer;
+
+	//Copy the data into parameters
+	memcpy(&key, tempBuffer + byteIndex, sizeof(int));
+	memcpy(&rid, tempBuffer + byteIndex + sizeof(int), sizeof(RecordId));
+
 	return 0;
 }
 

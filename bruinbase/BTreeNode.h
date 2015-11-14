@@ -204,6 +204,9 @@ class BTNonLeafNode {
 
   private:
     int numKeys; /* declare the variables that a NONLEAF must hold */
+    
+    //char* tempBuffer;   /*Temporary buffer used to store data from the buffer array*/
+
    /**
     * The main memory buffer for loading the content of the disk page
     * that contains the node.
