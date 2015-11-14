@@ -18,7 +18,7 @@
  */
 class BTLeafNode {
   public:
-    static const int MIN_NUM_KEYS = 70; 
+    static const int MIN_NUM_KEYS = 70;
     static const int BUFFER_SIZE = 1024;
     static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
     static const int MAX_NUM_LEAF_NODES = BUFFER_SIZE / PAIR_SIZE;  //1024  / 12 = 85
@@ -130,6 +130,9 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+    static const int BUFFER_SIZE = 1016;
+    static const int PAIR_SIZE = sizeof(PageId) + sizeof(int);    //This is the size in bytes of an empty pair
+    static const int NUM_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
     /**
      * Constructor for NONLEAF node; initialize the private variables
      */
