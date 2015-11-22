@@ -93,9 +93,22 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 		//Locate child node to look at next given the search key; update nextPId
 		error = middleNode.locateChildPtr(searchKey, nextPid);
 
+		if(error != 0) {
+			return RC_NO_SUCH_RECORD;
+		}
+
 		currentHeight++;
 	}
 
+	error = leaf.read(nextPid, pf);
+
+	if(error != 0) {
+		return RC_NO_SUCH_RECORD;
+	}
+
+	//Set up the IndexCursor with the found eid and nextPid (which is now the current pid)
+	cursor.eid = eid;
+	cursor.pid = nextPid;
 
 	// //Error
 	// IndexCursor.pid = PageId;
@@ -103,7 +116,6 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 
 	//index entry immediately after largest index key that is smaller than searchKey
 
-	return RC_NO_SUCH_RECORD;
 	//No error
 
     return 0;
