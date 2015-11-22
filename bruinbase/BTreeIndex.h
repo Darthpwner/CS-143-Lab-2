@@ -64,7 +64,7 @@ class BTreeIndex {
   /**
    * Recursive function to insert key into the correct Nonleaf and leaf nodes
    */
-  RC insert_recur(int key, const RecordId& rid);
+  RC insert_recur(int key, const RecordId& rid, int curHeight, PageId curPid, int& tmpKey, PageId& tmpPid);
 
   /**
    * Run the standard B+Tree key search algorithm and identify the

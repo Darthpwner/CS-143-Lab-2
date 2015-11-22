@@ -75,7 +75,15 @@ RC BTreeIndex::open(const string& indexname, char mode)
  */
 RC BTreeIndex::close()
 {
-    return 0;
+    /* we want to close the PageFile */
+    memcpy(buffer, &rootPid, sizeof(int));
+    memcpy(buffer + 4, &treeHeight, sizeof(int));
+
+    /* write buffer into PageFile */ 
+    RC error = pf.write(0, buffer);
+    if (error != 0)
+    	return error;
+    return pf.close();
 }
 
 /*
@@ -86,7 +94,94 @@ RC BTreeIndex::close()
  */
 RC BTreeIndex::insert(int key, const RecordId& rid)
 {
+    if (key < 0)
+    	return RC_INVALID_ATTRIBUTE;
+    /* if tree doesn't exist, we start from root */
+    if (treeHeight == 0) {
+    	BTLeafNode newTree;
+    	newTree.insert(key, rid);
+    	/* update the root pid
+    	   if endPid is 0, set it to 1
+    	   set rootPid should start from endPid()*/
+    	if (pf.endPid() == 0)
+    		rootPid = 1;
+    	else
+    		rootPid = pf.endPid();
+    	/* increment tree height by 1 after insertion */
+    	treeHeight++;
+    	return newTree.write(rootPid, pf);
+    }
+
+    /* if tree does exist, use our helper function to recursively find where
+       to insert. Start with pid = 1, and start with current height = 1 */
+    int insertKey = -1;
+    PageId insertPid = -1;
+    RC error;
+    error = insert_recur(key, rid, 1, rootPid, insertKey, insertPid);
+    if (error != 0)
+    	return error;
+    /* successfully inserted */
     return 0;
+}
+
+/**
+* Recursive function to insert key into the correct Nonleaf and leaf nodes
+*/
+RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId curPid, int& tmpKey, PageId& tmpPid)
+{
+	RC error; /* for returning error */
+
+	/* tmp variables for splitting and parent inserting */
+	tmpKey = -1;
+	tmpPid = -1;
+
+	/* if curHeight is equal to max, add a leaf node */
+	if (curHeight == treeHeight){
+		BTLeafNode newLeaf;
+		newLeaf.read(curPid, pf);
+		/* insert leaf node here, return if successful */
+		if (newLeaf.insert(key, rid) == 0){
+			newLeaf.write(curPid, pf);
+			return 0;
+		}
+		/* insert by splitting because can't insert before */
+		BTLeafNode Leaf2;
+		int key2;
+		error = newLeaf.insertAndSplit(key, rid, Leaf2, key2);
+		if (error != 0)
+			return error;
+
+		/* we know that key2 is the median key, and we need to place that in parent */
+		int lastPid = pf.endPid();
+		tmpKey = key2;
+		tmpPid = lastPid;
+		/* write content into our leaf objects */
+		newLeaf.setNextNodePtr(newLeaf, getNextNodePtr());
+		Leaf2.setNextNodePtr(lastPid);
+		/* check for errors */
+		error = newLeaf.write(curPid, pf);
+		if (error != 0)
+			return error;
+		error = Leaf2.write(lastPid, pf);
+		if (error != 0)
+			return error;
+
+		/* Adding the non leaf node */
+		if (treeHeight == 1) {
+			/* pid pointers to both new children */
+			BTNonLeafNode newRoot;
+			newRoot.initializeRoot(curPid, key2, lastPid);
+			treeHeight++;
+
+			rootPid = pf.endPid();
+			newRoot.write(rootPid, pf);
+		}
+		return 0;
+	}
+	/* this else indicates that we are in the middle of the tree (we didn't get the max height) */
+	else {
+		
+	}
 }
 
 /**
