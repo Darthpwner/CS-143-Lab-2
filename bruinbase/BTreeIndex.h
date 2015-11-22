@@ -87,6 +87,9 @@ class BTreeIndex {
    * @return error code. 0 if no error
    */
   RC readForward(IndexCursor& cursor, int& key, RecordId& rid);
+
+  //Used for testing purposes
+  void print();
   
  private:
   PageFile pf;         /// the PageFile used to store the actual b+tree in disk

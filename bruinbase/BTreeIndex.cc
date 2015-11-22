@@ -131,6 +131,48 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
  */
 RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 {
+	RC error;
+
+	//Gets position in the page from the cursor parameter
+	PageId cursorPid = cursor.pid;
+	int cursorEid = cursor.eid;
+
+	//Load data for the cursor's leaf
+	BTLeafNode leaf;
+	error = leaf.read(cursorPid, pf);
+
+	if(error != 0) {
+		return error;
+	}
+
+	//Based on the cursor's eid, obtain the key and the rid
+	error = leaf.readEntry(cursorEid, key, rid);
+
+	if(error != 0) {
+		return error;
+	}
+
+	//Make sure the cursor's PageId does not go beyond an uninitialized page
+	if(cursorPid <= 0) {
+		return RC_INVALID_CURSOR;
+	}
+
+	//Now we need to increment the cursorEid
+	//Be careful that the cursorEid does not exceed the max index of the leaf's buffer
+
+	//Make sure that incrementing cursorEid would not exceed the maximumeid index as determined by key count
+	if(cursorEid + 1 >= leaf.getKeyCount()) {
+		//If we exceed eid bounds, reset cursor's eid to 0
+		//Increment the pid
+		cursorEid = 0;
+		cursorPid = leaf.getNextNodePtr();
+	} else {
+		cursorEid++;
+	}
+
+	//Write the new position back into the cursor parameter
+	cursor.eid = cursorEid;
+	cursor.pid = cursorPid;
     return 0;
 }
 
