@@ -18,6 +18,7 @@ using namespace std;
 BTreeIndex::BTreeIndex()
 {
     rootPid = -1;
+    treeHeight = 0;	//Root of the tree is defined as level 0
 }
 
 /*
@@ -70,8 +71,41 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
  *                    smaller than searchKey.
  * @return 0 if searchKey is found. Othewise an error code
  */
+
+ //Check this function please
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
+	RC error;
+	BTNonLeafNode middleNode;
+	BTLeafNode leaf;
+
+	int eid;
+	int currentHeight = 1;
+	PageId nextPid = rootPid;
+
+	while(currentHeight < treeHeight) {
+		error = middleNode.read(nextPid, pf);
+
+		if(error != 0) {	//Read function should return 0 unless there is an error
+			return RC_NO_SUCH_RECORD;
+		}
+
+		//Locate child node to look at next given the search key; update nextPId
+		error = middleNode.locateChildPtr(searchKey, nextPid);
+
+		currentHeight++;
+	}
+
+
+	// //Error
+	// IndexCursor.pid = PageId;
+	// IndexCursor.eid = searchKey;
+
+	//index entry immediately after largest index key that is smaller than searchKey
+
+	return RC_NO_SUCH_RECORD;
+	//No error
+
     return 0;
 }
 
@@ -87,3 +121,44 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 {
     return 0;
 }
+
+//This function only prints up to two levels of nodes
+// void BTreeIndex::print() {
+// 	if(treeHeight == 1) {
+// 		BTLeafNode root;
+// 		root.read(rootPid, pf);
+// 		root.print();
+// 	} else if(treeHeight > 1) {
+// 		BTNonLeafNode root;
+// 		root.read(rootPid, pf);
+// 		root.print(&first, root.buffer, sizeof(PageId));
+
+// 		BTLeafNode firstLeaf, leaf;
+// 		firstLeaf.read(first, pf);
+// 		firstLeaf.print();
+
+// 		//Print the rest of the leaf ndoes
+// 		for(int i = 0; i < root.getKeyCount(); i++) {
+// 			memcpy(&rest, root.buffer + 12 + (8 * i), sizeof(PageId));
+// 			leaf.read(rest, pf);
+// 			leaf.print();
+// 		}
+
+// 		//Print each leaf node's current pid and next pid
+// 		cout << "-------" << endl;
+
+// 		for(int i = 0; i < root.getKeyCount(); i++) {
+// 			if(i == 0) {
+// 				cout << "leaf0 (pid=" << first << ") has next pid: " << firstLeaf.getNextNodePtr() << endl;
+// 			}
+
+// 			BTLeafNode tempLeaf;
+// 			PageId tempPid;
+// 			memcpy(&tempPid, root.buffer + 12 + (8 * i), sizeof(PageId));
+
+// 			tempLeaf.read(tempPid, pf);
+
+// 			cout << "Leaf" << i + 1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl;
+// 		}
+// 	}
+// }

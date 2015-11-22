@@ -18,6 +18,19 @@
  */
 class BTLeafNode {
   public:
+    static const int LARGEST_INDEX = 1008;  /*1008 is the largest possible index at which we can insert a pair since the max index is 1020
+                                            (4 bytes remaining)*/
+    static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
+    static const int NUM_OF_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId) )/ PAIR_SIZE;   /*  1024/12 = 85 node maximum,
+                                                                                                    Constant to check if adding one more
+                                                                                                    pair exceeds 85 node maximum
+                                                                                                */
+
+    /*
+    * Constructor that sets numKeys to 0
+    */
+    BTLeafNode();
+
    /**
     * Insert the (key, rid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -43,7 +56,7 @@ class BTLeafNode {
    /**
     * If searchKey exists in the node, set eid to the index entry
     * with searchKey and return 0. If not, set eid to the index entry
-    * immediately after the largest index key that is smaller than searchKey, 
+    * immediately after the largest index key that is smaller than searchKey,
     * and return the error code RC_NO_SUCH_RECORD.
     * Remember that keys inside a B+tree node are always kept sorted.
     * @param searchKey[IN] the key to search for.
@@ -64,14 +77,14 @@ class BTLeafNode {
 
    /**
     * Return the pid of the next slibling node.
-    * @return the PageId of the next sibling node 
+    * @return the PageId of the next sibling node
     */
     PageId getNextNodePtr();
 
 
    /**
     * Set the next slibling node PageId.
-    * @param pid[IN] the PageId of the next sibling node 
+    * @param pid[IN] the PageId of the next sibling node
     * @return 0 if successful. Return an error code if there is an error.
     */
     RC setNextNodePtr(PageId pid);
@@ -81,7 +94,7 @@ class BTLeafNode {
     * @return the number of keys in the node
     */
     int getKeyCount();
- 
+
    /**
     * Read the content of the node from the page pid in the PageFile pf.
     * @param pid[IN] the PageId to read
@@ -89,7 +102,7 @@ class BTLeafNode {
     * @return 0 if successful. Return an error code if there is an error.
     */
     RC read(PageId pid, const PageFile& pf);
-    
+
    /**
     * Write the content of the node to the page pid in the PageFile pf.
     * @param pid[IN] the PageId to write to
@@ -98,13 +111,22 @@ class BTLeafNode {
     */
     RC write(PageId pid, PageFile& pf);
 
+    /*
+    *   Print the keys of the node
+    */
+    void print();
+
   private:
+    int numKeys;    /*Number of keys that a leaf can hold*/
+    char* tempBuffer;   /*Temporary buffer to hold values from buffer*/
+    PageId nextNodePtr; /*Next node pointer for the inserted leaf node*/
+
    /**
-    * The main memory buffer for loading the content of the disk page 
+    * The main memory buffer for loading the content of the disk page
     * that contains the node.
     */
     char buffer[PageFile::PAGE_SIZE];
-}; 
+};
 
 
 /**
@@ -112,6 +134,14 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+    static const int BUFFER_SIZE = 1016;
+    static const int PAIR_SIZE = sizeof(PageId) + sizeof(int);    //This is the size in bytes of an empty pair
+    static const int NUM_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId)) / PAIR_SIZE;
+    /**
+     * Constructor for NONLEAF node; initialize the private variables
+     */
+    BTNonLeafNode();
+
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -167,7 +197,7 @@ class BTNonLeafNode {
     * @return 0 if successful. Return an error code if there is an error.
     */
     RC read(PageId pid, const PageFile& pf);
-    
+
    /**
     * Write the content of the node to the page pid in the PageFile pf.
     * @param pid[IN] the PageId to write to
@@ -176,12 +206,21 @@ class BTNonLeafNode {
     */
     RC write(PageId pid, PageFile& pf);
 
+    /**
+     * Print the keys of the node to cout
+     */
+     void print();
+
   private:
+    int numKeys; /* declare the variables that a NONLEAF must hold */
+
+    //char* tempBuffer;   /*Temporary buffer used to store data from the buffer array*/
+
    /**
-    * The main memory buffer for loading the content of the disk page 
+    * The main memory buffer for loading the content of the disk page
     * that contains the node.
     */
     char buffer[PageFile::PAGE_SIZE];
-}; 
+};
 
 #endif /* BTREENODE_H */
