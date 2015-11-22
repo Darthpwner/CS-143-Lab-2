@@ -315,7 +315,7 @@ void BTreeIndex::print() {
 	
 	if(treeHeight > 1) {
 		PageId first, rest;
-		memcpy(&first, root.buffer, sizeof(PageId));
+		memcpy(&first, root.getBuffer(), sizeof(PageId));
 
 		BTLeafNode firstLeaf, leaf;
 		firstLeaf.read(first, pf);
@@ -323,7 +323,7 @@ void BTreeIndex::print() {
 
 		//Print out the rest of the leaf nodes
 		for(int i = 0; i < root.getKeyCount(); i++) {
-			memcpy(&rest, root.buffer + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
+			memcpy(&rest, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
 			leaf.read(rest, pf);
 			leaf.print();
 		}
@@ -338,7 +338,7 @@ void BTreeIndex::print() {
 
 			BTLeafNode tempLeaf;
 			PageId tempPid;
-			memcpy(&tempPid, root.buffer + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
+			memcpy(&tempPid, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
 
 			tempLeaf.read(tempPid, pf);
 
