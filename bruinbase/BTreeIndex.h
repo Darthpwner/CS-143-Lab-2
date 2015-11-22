@@ -59,6 +59,11 @@ class BTreeIndex {
   RC insert(int key, const RecordId& rid);
 
   /**
+   * Recursive function to insert key into the correct Nonleaf and leaf nodes
+   */
+  RC insert_recur(int key, const RecordId& rid);
+
+  /**
    * Run the standard B+Tree key search algorithm and identify the
    * leaf node where searchKey may exist. If an index entry with
    * searchKey exists in the leaf node, set IndexCursor to its location 
@@ -100,6 +105,9 @@ class BTreeIndex {
   /// this class is destructed. Make sure to store the values of the two 
   /// variables in disk, so that they can be reconstructed when the index
   /// is opened again later.
+
+  /// buffer with pid = 0 to store rootPid and treeHeight in disk
+  char buffer[PageFile::PAGE_SIZE];
 };
 
 #endif /* BTREEINDEX_H */

@@ -9,6 +9,9 @@
  
 #include "BTreeIndex.h"
 #include "BTreeNode.h"
+#include <cstdlib>
+#include <iostream>
+#include "string.h"
 
 using namespace std;
 
@@ -19,6 +22,10 @@ BTreeIndex::BTreeIndex()
 {
     rootPid = -1;
     treeHeight = 0;	//Root of the tree is defined as level 0
+
+    /* Buffer: needed to communicate with rootPid and treeHeight when we 
+       use open and close functions */
+    std::fill(buffer, buffer + PageFile::PAGE_SIZE, 0); /* clear the buffer if necessary */
 }
 
 /*
@@ -30,6 +37,35 @@ BTreeIndex::BTreeIndex()
  */
 RC BTreeIndex::open(const string& indexname, char mode)
 {
+    /* Use PageFile's open method with same parameters */
+    RC error = pf.open(indexname, mode);
+    if (error != 0)
+    	return error;
+    /* if endPid() is 0, we want to initialize everything again */
+    if (pf.endPid() == 0){
+    	rootPid = -1;
+    	treeHeight = 0;
+    	RC error = pf.write(0, buffer);
+    	if (error != 0)
+    		return error;
+    	return 0;
+    }
+    /* Now, we can read buffer's data from the disk */
+    error = pf.read(0, buffer);
+    if (error != 0)
+    	return error;
+
+    /* create variables to hold pid and height */
+    int tmpPid;
+    int tmpHeight;
+    memcpy(&tmpPid, buffer, sizeof(int));
+    memcpy(&tmpHeight, buffer + 4, sizeof(int));
+
+    /* set rootPid to tmpPid and treeHeight to tmpHeight */
+    if (tmpPid > 0 && tmpHeight > 0){
+    	rootPid = tmpPid;
+    	treeHeight = tmpHeight;
+    }
     return 0;
 }
 
