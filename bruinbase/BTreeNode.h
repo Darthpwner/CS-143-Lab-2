@@ -23,10 +23,8 @@ class BTLeafNode {
     static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
     static const int NUM_OF_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId) )/ PAIR_SIZE;   /*  1024/12 = 85 node maximum */
                        
-    //Getter
-    char* getBuffer() {
-        return buffer;
-    }  
+    //Getter for the buffer private data member
+    char* getBuffer();  
     
     /*
     * Constructor that sets numKeys to 0

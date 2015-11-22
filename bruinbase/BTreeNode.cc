@@ -9,6 +9,11 @@ BTLeafNode::BTLeafNode() {
 	numKeys = 0;
 }
 
+//Getter for the buffer private data member
+char* BTLeafNode::getBuffer() {
+	return buffer;
+}
+
 /*
  * Read the content of the node from the page pid in the PageFile pf.
  * @param pid[IN] the PageId to read

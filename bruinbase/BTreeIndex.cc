@@ -156,7 +156,7 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 		tmpKey = key2;
 		tmpPid = lastPid;
 		/* write content into our leaf objects */
-		newLeaf.setNextNodePtr(newLeaf, getNextNodePtr());
+		newLeaf.setNextNodePtr(newLeaf.getNextNodePtr());
 		Leaf2.setNextNodePtr(lastPid);
 		/* check for errors */
 		error = newLeaf.write(curPid, pf);
