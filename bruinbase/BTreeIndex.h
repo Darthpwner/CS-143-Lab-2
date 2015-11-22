@@ -33,6 +33,9 @@ typedef struct {
  */
 class BTreeIndex {
  public:
+  static const int BYTE_SIZE = 8;
+  static const int OFFSET = 12;
+
   BTreeIndex();
 
   /**

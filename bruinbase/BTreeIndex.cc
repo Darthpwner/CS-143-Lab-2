@@ -9,6 +9,9 @@
  
 #include "BTreeIndex.h"
 #include "BTreeNode.h"
+#include <cstdlib>
+#include <iostream>
+#include "string.h"
 
 using namespace std;
 
@@ -177,42 +180,41 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 }
 
 //This function only prints up to two levels of nodes
-// void BTreeIndex::print() {
-// 	if(treeHeight == 1) {
-// 		BTLeafNode root;
-// 		root.read(rootPid, pf);
-// 		root.print();
-// 	} else if(treeHeight > 1) {
-// 		BTNonLeafNode root;
-// 		root.read(rootPid, pf);
-// 		root.print(&first, root.buffer, sizeof(PageId));
+void BTreeIndex::print() {
+	BTLeafNode root;
+	root.read(rootPid, pf);
+	root.print();
+	
+	if(treeHeight > 1) {
+		PageId first, rest;
+		memcpy(&first, root.buffer, sizeof(PageId));
 
-// 		BTLeafNode firstLeaf, leaf;
-// 		firstLeaf.read(first, pf);
-// 		firstLeaf.print();
+		BTLeafNode firstLeaf, leaf;
+		firstLeaf.read(first, pf);
+		firstLeaf.print();
 
-// 		//Print the rest of the leaf ndoes
-// 		for(int i = 0; i < root.getKeyCount(); i++) {
-// 			memcpy(&rest, root.buffer + 12 + (8 * i), sizeof(PageId));
-// 			leaf.read(rest, pf);
-// 			leaf.print();
-// 		}
+		//Print out the rest of the leaf nodes
+		for(int i = 0; i < root.getKeyCount(); i++) {
+			memcpy(&rest, root.buffer + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
+			leaf.read(rest, pf);
+			leaf.print();
+		}
 
-// 		//Print each leaf node's current pid and next pid
-// 		cout << "-------" << endl;
+		//Print each leaf node's current pid and next pid
+		cout << "----------" << endl;
 
-// 		for(int i = 0; i < root.getKeyCount(); i++) {
-// 			if(i == 0) {
-// 				cout << "leaf0 (pid=" << first << ") has next pid: " << firstLeaf.getNextNodePtr() << endl;
-// 			}
+		for(int i = 0; i < root.getKeyCount(); i++) {
+			if(i == 0) {
+				cout << "leaf0 (pid=" << first << ") has next pid: " << firstLeaf.getNextNodePtr() << endl;
+			}
 
-// 			BTLeafNode tempLeaf;
-// 			PageId tempPid;
-// 			memcpy(&tempPid, root.buffer + 12 + (8 * i), sizeof(PageId));
+			BTLeafNode tempLeaf;
+			PageId tempPid;
+			memcpy(&tempPid, root.buffer + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
 
-// 			tempLeaf.read(tempPid, pf);
+			tempLeaf.read(tempPid, pf);
 
-// 			cout << "Leaf" << i + 1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl;
-// 		}
-// 	}
-// }
+			cout << "leaf" << i + 1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl; 
+ 		}
+	}
+}
