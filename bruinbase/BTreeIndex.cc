@@ -180,7 +180,54 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 	}
 	/* this else indicates that we are in the middle of the tree (we didn't get the max height) */
 	else {
-		
+		BTNonLeafNode midNode;
+		midNode.read(curPid, pf);
+		/* find the childPid using locateChildPtr */
+		PageId childPid = -1;
+		midNode.locateChildPtr(key, childPid);
+		int insertKey = -1;
+		PageId insertPid = -1;
+		/* Recursion: traverse through tree, inserting at the next node until reaching leaf */
+		error = insert_recur(key, rid, curHeight+1, childPid, insertKey, insertPid);
+
+		/* if there's an error, it means that we reached max
+		   we will need to add a median key to parent node */
+		if (!(insertKey == -1 && insertPid == -1)){
+			/* try inserting into midNode */
+			if (midNode.insert(insertKey, insertPid) == 0){
+				midNode.write(curPid, pf);
+				return 0;
+			}
+			/* otherwise, insert and split, and move median key up the level */
+			BTNonLeafNode midNode2;
+			int key2;
+
+			midNode.insertAndSplit(insertKey, insertPid, midNode2, key2);
+
+			/* save the median key for the parent */
+			int lastPid = pf.endPid();
+			tmpKey = key2;
+			tmpPid = lastPid;
+
+			error = midNode.write(curPid, pf);
+			if (error != 0)
+				return error;
+
+			error = midNode2.write(lastPid, pf);
+			if (error != 0)
+				return error;
+			/* special case: if root was split, 
+			   we need new single non-leaf nodes as root*/
+			if (treeHeight == 1){
+				BTNonLeafNode newRoot;
+				newRoot.initializeRoot(curPid, key2, lastPid);
+				treeHeight++;
+
+				rootPid = pf.endPid();
+				newRoot.write(rootPid, pf);
+			}
+		}
+		return 0; /* success */
 	}
 }
 
