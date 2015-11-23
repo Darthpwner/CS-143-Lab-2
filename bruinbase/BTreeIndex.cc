@@ -250,7 +250,7 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
  * @return 0 if searchKey is found. Othewise an error code
  */
 
- //Check this function please
+//Verify this function works
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
 	//OLD WAY
@@ -324,10 +324,10 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 		}
 
 		//Locate leaf node corresponding to the search key and update eid
-		error = leaf.locate(searchKey, eid);
+		error = leaf.locate(searchKey, eid);	//Returns either 0 or RC_NO_SUCH_RECORD
 
 		if(error != 0) {
-			return RC_NO_SUCH_RECORD;
+			return error;
 		}
 
 		//Assign to the IndexCursor the values of eid and nextPid
