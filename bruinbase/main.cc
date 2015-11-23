@@ -50,6 +50,7 @@ int main()
 
 int x = 0;
 PageId pidPtr = 8;
+PageId pidPtr1 = 29;
 //Prints out pointers :)
 
 printf("%d\n", leaf.getKeyCount()); //Prints 4
@@ -64,7 +65,8 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   nonLeaf.insert(98, 8);
   nonLeaf.insert(312, 8);
   nonLeaf.insert(312, 8);
-  nonLeaf.locateChildPtr(312, pidPtr);
+  int error = nonLeaf.locateChildPtr(313, pidPtr1);
+  printf("locateChildPtr: %d\n", error);  //Always gives 0 for some reason?
 
   leaf.insert(10, rid);
   leaf.insert(50, rid1);

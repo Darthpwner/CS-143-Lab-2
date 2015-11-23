@@ -86,7 +86,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 		memcpy(&insertKey, tempBuffer, sizeof(int));	//Save the insertKey inside tempBuffer
 
 		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
-		if(insertKey == 0 || key < insertKey) {
+		if(insertKey == 0 || key <= insertKey) {
 			break;
 		}
 
@@ -311,6 +311,9 @@ void BTLeafNode::print() {
 	char* tempBuffer = buffer;
 
 	for(int i = 0; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
+		int key;
+		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key into temp buffer
+
 		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair
 
 		tempBuffer += PAIR_SIZE;	//tempBuffer jumps to the next key
