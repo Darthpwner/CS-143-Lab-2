@@ -253,51 +253,6 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 //Verify this function works
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
-	//OLD WAY
-/*	RC error;
-	BTNonLeafNode nonLeaf;
-	BTLeafNode leaf;
-
-	int eid;
-	int currentHeight = 1;
-	PageId nextPid = rootPid;
-
-	while(currentHeight < treeHeight) {
-		error = nonLeaf.read(nextPid, pf);
-
-		if(error != 0) {	//Read function should return 0 unless there is an error
-			return RC_NO_SUCH_RECORD;
-		}
-
-		//Locate child node to look at next given the search key; update nextPId
-		error = nonLeaf.locateChildPtr(searchKey, nextPid);
-
-		if(error != 0) {
-			return RC_NO_SUCH_RECORD;
-		}
-
-		currentHeight++;
-	}
-
-	error = leaf.read(nextPid, pf);
-
-	if(error != 0) {
-		return RC_NO_SUCH_RECORD;
-	}
-
-	//Set up the IndexCursor with the found eid and nextPid (which is now the current pid)
-	cursor.eid = eid;
-	cursor.pid = nextPid; */
-
-	// //Error
-	// IndexCursor.pid = PageId;
-	// IndexCursor.eid = searchKey;
-
-	//index entry immediately after largest index key that is smaller than searchKey
-
-	//No error
-
-//    return 0;
 	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid);
 }
 
@@ -432,7 +387,7 @@ void BTreeIndex::print() {
 		}
 
 		//Print each leaf node's current pid and next pid
-		cout << "----------" << endl;
+		cout << "-------------------" << endl;
 
 		for(int i = 0; i < root.getKeyCount(); i++) {
 			if(i == 0) {
