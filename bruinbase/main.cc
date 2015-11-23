@@ -45,9 +45,10 @@ int main()
 
 //  leaf.read();
 
-  // nonLeaf.insert(15, rid);
-  // nonLeaf.insert(1, rid);
-  // nonLeaf.insert(312, rid);
+//Prints out pointers :)
+  nonLeaf.insert(15, 5);
+  nonLeaf.insert(1, 6);
+  nonLeaf.insert(312, 8);
 
   leaf.insert(10, rid);
   leaf.insert(50, rid1);
