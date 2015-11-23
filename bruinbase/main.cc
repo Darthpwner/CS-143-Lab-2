@@ -22,7 +22,9 @@ int main()
   //printf("HELLO WORLD\n");
   BTreeIndex b;
   BTLeafNode leaf;
+  printf("%d\n", leaf.getKeyCount()); //Appears there are originally 4 leaves?
   BTNonLeafNode nonLeaf;
+  BTNonLeafNode nonLeaf1;
 
   PageFile pf;	
   RecordFile rf;
@@ -38,26 +40,44 @@ int main()
   	rid1.sid = 2;
 
   	if(rid > rid1) {
-  		printf("rid is bigger");
+  		printf("rid is bigger\n");
   	} else {
-  		printf("rid1 is bigger");
+  		printf("rid1 is bigger\n");
   	}
 
 //  leaf.read();
 
+
+int x = 0;
+PageId pidPtr = 8;
 //Prints out pointers :)
+
+printf("%d\n", leaf.getKeyCount()); //Prints 4
+
+  nonLeaf.insertAndSplit(99, 5, nonLeaf1, x);
+
   nonLeaf.insert(15, 5);
   nonLeaf.insert(1, 6);
   nonLeaf.insert(312, 8);
+  nonLeaf.insert(-5, 8);
+  nonLeaf.insert(312, 8);
+  nonLeaf.insert(98, 8);
+  nonLeaf.insert(312, 8);
+  nonLeaf.insert(312, 8);
+  nonLeaf.locateChildPtr(312, pidPtr);
 
   leaf.insert(10, rid);
   leaf.insert(50, rid1);
+  printf("%d\n", leaf.getKeyCount()); //Prints 6
   //leaf.insert(20, rid);
   //leaf.insert(32, rid);
 
   leaf.print();
 
   nonLeaf.print();
+  printf("\n");
+  int result =   nonLeaf.getKeyCount();
+  printf("%d\n", result); //8
 
   //b.insert(10, 'good');
  // RecordFile::append(10, 'good');
