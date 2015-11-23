@@ -13,8 +13,13 @@
 
 int main()
 {
+	//TESTING PURPOSES
+  printf("HELLO WORLD\n");
+	//END TESTING PURPOSES
+
   // run the SQL engine taking user commands from standard input (console).
   SqlEngine::run(stdin);
+
 
   return 0;
 }
