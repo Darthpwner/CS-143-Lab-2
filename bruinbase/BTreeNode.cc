@@ -203,6 +203,8 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
                    behind the largest key smaller than searchKey.
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
+
+ //THIS MIGHT NEED FIXING
 RC BTLeafNode::locate(int searchKey, int& eid) {
 	char* tempBuffer = buffer;
 
@@ -212,19 +214,29 @@ RC BTLeafNode::locate(int searchKey, int& eid) {
 		int key;
 		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key inside buffer
 
-		//If the key is larger than or equal to the searchKey, set eid
-		if(key >= searchKey) {
-			//eid = current byte index divided by size of a pair entry
+		if(key == searchKey) {
+			//eid = current byte index divided by size of a a pair entry
 			eid = i/PAIR_SIZE;
 			return 0;
+		} else if(key < searchKey) {	//Jump by PAIR_SIZE and make another comparison
+			eid += PAIR_SIZE;
+		} else {
+			break;
 		}
+
+		// //If the key is larger than or equal to the searchKey, set eid
+		// if(key >= searchKey) {
+		// 	//eid = current byte index divided by size of a pair entry
+		// 	eid = i/PAIR_SIZE;
+		// 	return 0;
+		// }
 
 		tempBuffer += PAIR_SIZE;
 	}
 
-	//If we reach this point, every key inside the buffer was less than the searchKey parameter
-	eid = getKeyCount();
-	return 0;
+	//If we reach this point, we checked every entry of the node and could not find the searchKey
+	//eid = getKeyCount();
+	return RC_NO_SUCH_RECORD;
 }
 
 /*

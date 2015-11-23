@@ -35,6 +35,7 @@ class BTreeIndex {
  public:
   static const int BYTE_SIZE = 8;
   static const int OFFSET = 12;
+  static const int ROOT_HEIGHT = 1;
 
   BTreeIndex();
 

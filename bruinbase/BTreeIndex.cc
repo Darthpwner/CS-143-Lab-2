@@ -253,7 +253,8 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
  //Check this function please
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
-	RC error;
+	//OLD WAY
+/*	RC error;
 	BTNonLeafNode nonLeaf;
 	BTLeafNode leaf;
 
@@ -286,7 +287,7 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 
 	//Set up the IndexCursor with the found eid and nextPid (which is now the current pid)
 	cursor.eid = eid;
-	cursor.pid = nextPid;
+	cursor.pid = nextPid; */
 
 	// //Error
 	// IndexCursor.pid = PageId;
@@ -296,13 +297,62 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 
 	//No error
 
-    return 0;
+//    return 0;
+	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid)
 }
 
 //Recursive function to locate where the search key belongs
 //Runs until we hit the base case of finding the search key's corresponding leaf node
 RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid) {
+	//Safety check to ensure keys are not negative
+	if(searchKey < 0) {
+		return RC_INVALID_ATTRIBUTE;
+	}
 
+	RC error;
+
+	//Base case (leaf node)
+	if(curHeight == treeHeight) {
+		int eid = -1;
+
+		//Load data for leaf node
+		BTLeafNode leaf;
+		error = leaf.read(nextPid, pf);	//Read the contents of the node
+
+		if(error != 0) {
+			return RC_NO_SUCH_RECORD;
+		}
+
+		//Locate leaf node corresponding to the search key and update eid
+		error = leaf.locate(searchKey, eid);
+
+		if(error != 0) {
+			return RC_NO_SUCH_RECORD;
+		}
+
+		//Assign to the IndexCursor the values of eid and nextPid
+		cursor.eid = eid;
+		cursor.pid = nextPid;
+	}
+
+	//Non-leaf node
+	//load data for the non-leaf node
+	BTNonLeafNode nonLeaf;
+	error = nonLeaf.read(nextPid, pf);
+
+	if(error != 0) {
+		return RC_NO_SUCH_RECORD;
+	}
+
+	//Locate the child node of the search key and update nextPid
+	error = nonLeaf.locateChildPtr(searchKey, nextPid);
+
+	if(error != 0) {
+		return RC_NO_SUCH_RECORD;
+	}
+
+	//Recursive step
+	return locate_recur(searchKey, cursor, curHeight - 1, nextPid);
 }
 
 /*
