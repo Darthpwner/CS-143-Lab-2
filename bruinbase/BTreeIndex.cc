@@ -298,7 +298,7 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 	//No error
 
 //    return 0;
-	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid)
+	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid);
 }
 
 //Recursive function to locate where the search key belongs
