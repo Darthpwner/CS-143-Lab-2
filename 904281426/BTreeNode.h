@@ -26,6 +26,8 @@ class BTLeafNode {
                                                                                                     pair exceeds 85 node maximum
                                                                                                 */
 
+    char* getBuffer();
+
     /*
     * Constructor that sets numKeys to 0
     */
