@@ -24,6 +24,16 @@ int main()
   BTLeafNode leaf;
   BTNonLeafNode nonLeaf;
 
+  PageFile pf;
+  RecordFile rf;
+ 
+ //How do we initialize a recordId?
+ RecordId rid;
+
+//  leaf.read();
+
+  leaf.insert(10, rid);
+
   //b.insert(10, 'good');
  // RecordFile::append(10, 'good');
   b.print();
