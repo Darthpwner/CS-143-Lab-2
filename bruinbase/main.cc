@@ -25,13 +25,20 @@ int main()
   BTNonLeafNode nonLeaf;
 
   PageFile pf;	
-  RecordFile rf;	
- 
+  RecordFile rf;
+
  //How do we initialize a recordId?
   PageId pid;	//integer
- RecordId rid;	//has a PageId pid and int sid
+ 	RecordId rid;	//has a PageId pid and int sid
+	rid.sid = 1;
+  	rid.pid = 1;
+
 
 //  leaf.read();
+
+  // nonLeaf.insert(15, rid);
+  // nonLeaf.insert(1, rid);
+  // nonLeaf.insert(312, rid);
 
   leaf.insert(10, rid);
   leaf.insert(20, rid);
@@ -39,9 +46,11 @@ int main()
 
   leaf.print();
 
+  nonLeaf.print();
+
   //b.insert(10, 'good');
  // RecordFile::append(10, 'good');
-  b.print();
+  // b.print();
 	//END TESTING PURPOSES
 
   // run the SQL engine taking user commands from standard input (console).
