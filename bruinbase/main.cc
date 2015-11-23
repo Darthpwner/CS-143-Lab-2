@@ -24,8 +24,8 @@ int main()
   BTLeafNode leaf;
   BTNonLeafNode nonLeaf;
 
-  PageFile pf;
-  RecordFile rf;
+  PageFile pf;	//integer
+  RecordFile rf;	//has a PageId pid and int sid
  
  //How do we initialize a recordId?
  RecordId rid;
