@@ -19,7 +19,7 @@
 int main()
 {
 	//TESTING PURPOSES
-  printf("HELLO WORLD\n");
+  //printf("HELLO WORLD\n");
   BTreeIndex b;
   BTLeafNode leaf;
   BTNonLeafNode nonLeaf;
@@ -33,6 +33,15 @@ int main()
 	rid.sid = 1;
   	rid.pid = 1;
 
+  	RecordId rid1;
+  	rid1.sid = 2;
+  	rid1.sid = 2;
+
+  	if(rid > rid1) {
+  		printf("rid is bigger");
+  	} else {
+  		printf("rid1 is bigger");
+  	}
 
 //  leaf.read();
 
@@ -41,8 +50,9 @@ int main()
   // nonLeaf.insert(312, rid);
 
   leaf.insert(10, rid);
-  leaf.insert(20, rid);
-  leaf.insert(32, rid);
+  leaf.insert(50, rid1);
+  //leaf.insert(20, rid);
+  //leaf.insert(32, rid);
 
   leaf.print();
 
