@@ -24,15 +24,20 @@ int main()
   BTLeafNode leaf;
   BTNonLeafNode nonLeaf;
 
-  PageFile pf;	//integer
-  RecordFile rf;	//has a PageId pid and int sid
+  PageFile pf;	
+  RecordFile rf;	
  
  //How do we initialize a recordId?
- RecordId rid;
+  PageId pid;	//integer
+ RecordId rid;	//has a PageId pid and int sid
 
 //  leaf.read();
 
   leaf.insert(10, rid);
+  leaf.insert(20, rid);
+  leaf.insert(32, rid);
+
+  leaf.print();
 
   //b.insert(10, 'good');
  // RecordFile::append(10, 'good');
