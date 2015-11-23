@@ -68,13 +68,15 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   int error = nonLeaf.locateChildPtr(313, pidPtr1);
   printf("locateChildPtr: %d\n", error);  //Always gives 0 for some reason?
 
-  leaf.insert(10, rid);
-  leaf.insert(50, rid1);
+  int a = leaf.insert(10, rid);
+  int c = leaf.insert(50, rid1);
+  printf("%d\n", a); //Prints 0 Success!
+  printf("%d\n", c); //Prints 0 Success!
   printf("%d\n", leaf.getKeyCount()); //Prints 6
   //leaf.insert(20, rid);
   //leaf.insert(32, rid);
 
-  leaf.print();
+  leaf.print(); //WHY DOES THIS GIVE SOME WEIRD ASCII?
 
   nonLeaf.print();
   printf("\n");

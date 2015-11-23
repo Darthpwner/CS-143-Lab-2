@@ -159,7 +159,7 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 	int indexAtHalf = numberOfHalfKeys * PAIR_SIZE;
 
 	//Copy everything from the right side of the halfIndex into our sibling's buffer except the pid
-	memcpy(sibling.buffer, buffer + indexAtHalf, PageFile::PAGE_SIZE - sizeof(PageId) - indexAtHalf);
+	memcpy(sibling.buffer, buffer + indexAtHalf, PageFile::PAGE_SIZE-sizeof(PageId) - indexAtHalf);
 
 	//Update sibling's number of keys and set sibling's pid to current node's pid ptr
 	sibling.numKeys = getKeyCount() - numberOfHalfKeys;
