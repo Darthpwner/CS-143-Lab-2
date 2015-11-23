@@ -21,7 +21,11 @@ int main()
 	//TESTING PURPOSES
   printf("HELLO WORLD\n");
   BTreeIndex b;
+  BTLeafNode leaf;
+  BTNonLeafNode nonLeaf;
 
+  //b.insert(10, 'good');
+ // RecordFile::append(10, 'good');
   b.print();
 	//END TESTING PURPOSES
 
