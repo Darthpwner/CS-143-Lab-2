@@ -11,10 +11,18 @@
 #include "SqlEngine.h"
 #include <cstdio>
 
+//TESTING PURPOSES
+ #include "BTreeIndex.h"
+ #include "BTreeNode.h"
+//END TESTING PURPOSES
+
 int main()
 {
 	//TESTING PURPOSES
   printf("HELLO WORLD\n");
+  BTreeIndex b;
+
+  b.print();
 	//END TESTING PURPOSES
 
   // run the SQL engine taking user commands from standard input (console).
