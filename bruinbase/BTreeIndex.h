@@ -87,6 +87,11 @@ class BTreeIndex {
   RC locate(int searchKey, IndexCursor& cursor);
 
   /**
+  * Recursive function to locate where the search key belongs
+  */
+  RC locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid);
+
+  /**
    * Read the (key, rid) pair at the location specified by the index cursor,
    * and move foward the cursor to the next entry.
    * @param cursor[IN/OUT] the cursor pointing to an leaf-node index entry in the b+tree

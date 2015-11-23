@@ -254,7 +254,7 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
 	RC error;
-	BTNonLeafNode middleNode;
+	BTNonLeafNode nonLeaf;
 	BTLeafNode leaf;
 
 	int eid;
@@ -262,14 +262,14 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 	PageId nextPid = rootPid;
 
 	while(currentHeight < treeHeight) {
-		error = middleNode.read(nextPid, pf);
+		error = nonLeaf.read(nextPid, pf);
 
 		if(error != 0) {	//Read function should return 0 unless there is an error
 			return RC_NO_SUCH_RECORD;
 		}
 
 		//Locate child node to look at next given the search key; update nextPId
-		error = middleNode.locateChildPtr(searchKey, nextPid);
+		error = nonLeaf.locateChildPtr(searchKey, nextPid);
 
 		if(error != 0) {
 			return RC_NO_SUCH_RECORD;
@@ -297,6 +297,12 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 	//No error
 
     return 0;
+}
+
+//Recursive function to locate where the search key belongs
+//Runs until we hit the base case of finding the search key's corresponding leaf node
+RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid) {
+
 }
 
 /*
