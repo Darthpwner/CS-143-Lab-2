@@ -96,19 +96,35 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("read: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
   printf("write: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
   printf("getKey: %d\n", leaf.getKeyCount());  //4
-  printf("insert: %d\n", leaf.insert(5, rid));  //Why does this give an error
+  printf("insert: %d\n", leaf.insert(5, rid));  //0
   printf("getKey: %d\n", leaf.getKeyCount());  //5
-  printf("insert: %d\n", leaf.insert(0, rid));  //Why does this give an error
-  printf("getKey: %d\n", leaf.getKeyCount());  //0
+  printf("insert: %d\n", leaf.insert(0, rid));  //0
+  printf("getKey: %d\n", leaf.getKeyCount());  //6, why does this give 0
+  printf("insert: %d\n", leaf.insert(5, rid));  //0
+  printf("getKey: %d\n", leaf.getKeyCount());  //7, why does this give 1
 
   printf("insertAndSplit: %d\n", leaf.insertAndSplit(7, rid, leaf, myKey));  //Why does this give an error
   printf("locate: %d\n", leaf.locate(5, eid));  //Should return 0 :)
   printf("eid has value: %d\n", eid);
+  printf("locate: %d\n", leaf.locate(5, eid));  //Should return 0 :)
+  printf("eid has value: %d\n", eid);
+
   printf("locate: %d\n", leaf.locate(-100, eid));  //Why does this give an error
   printf("eid has value: %d\n", eid);
   printf("locate: %d\n", leaf.locate(7, eid));  //Why does this give an error
   printf("eid has value: %d\n", eid);
   
+  printf("BTNonLeafNode:\n");
+  BTNonLeafNode nonLeaf2;
+  int midKey;
+  printf("read: %d\n", nonLeaf2.read(pidPtr, pf));  //Why does this give an error
+  printf("write: %d\n", nonLeaf2.write(pidPtr, pf));  //Why does this give an error
+  printf("getKey: %d\n", nonLeaf2.getKeyCount());  //0
+  printf("insert: %d\n", nonLeaf2.insert(3, pid));  //3
+  printf("insertAndSplit: %d\n", nonLeaf2.insertAndSplit(4, pid, nonLeaf, midKey));
+  printf("locateChildPtr: %d\n", nonLeaf2.locateChildPtr(3, pid));  //3
+  printf("initializeRoot: %d\n", nonLeaf2.initializeRoot(pidPtr, 20, pidPtr1));  
+
 
 //  printf("readEntry: %d\n", leaf.readEntry(eid));
 
