@@ -250,109 +250,106 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
  * @return 0 if searchKey is found. Othewise an error code
  */
 
-//Verify this function works
+
+	//Verify this function works
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
-	//OLD WAY
-/*	RC error;
-	BTNonLeafNode nonLeaf;
+	RC error;	
+	BTNonLeafNode midNode;
 	BTLeafNode leaf;
-
+	
 	int eid;
-	int currentHeight = 1;
+	int currHeight = 1;
 	PageId nextPid = rootPid;
-
-	while(currentHeight < treeHeight) {
-		error = nonLeaf.read(nextPid, pf);
-
-		if(error != 0) {	//Read function should return 0 unless there is an error
-			return RC_NO_SUCH_RECORD;
-		}
-
-		//Locate child node to look at next given the search key; update nextPId
-		error = nonLeaf.locateChildPtr(searchKey, nextPid);
-
-		if(error != 0) {
-			return RC_NO_SUCH_RECORD;
-		}
-
-		currentHeight++;
+	
+	while(currHeight!=treeHeight)
+	{
+		error = midNode.read(nextPid, pf);
+		
+		if(error!=0)
+			return error;
+		
+		//Locate child node to look at next given the search key; update nextPid
+		error = midNode.locateChildPtr(searchKey, nextPid);
+		
+		if(error!=0)
+			return error;
+		
+		currHeight++;
 	}
-
+	
 	error = leaf.read(nextPid, pf);
-
-	if(error != 0) {
-		return RC_NO_SUCH_RECORD;
-	}
-
-	//Set up the IndexCursor with the found eid and nextPid (which is now the current pid)
+		
+	if(error!=0)
+		return error;
+	
+	//Locate leaf node that corresponds with search key; update eid
+	error = leaf.locate(searchKey, eid);
+	
+	if(error!=0)
+		return error;
+	
+	//Set up the IndexCursor with the found eid and nextPid (which is now current pid)
 	cursor.eid = eid;
-	cursor.pid = nextPid; */
-
-	// //Error
-	// IndexCursor.pid = PageId;
-	// IndexCursor.eid = searchKey;
-
-	//index entry immediately after largest index key that is smaller than searchKey
-
-	//No error
-
-//    return 0;
-	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid);
+	cursor.pid = nextPid;
+	
+	return 0;
+	
+	//Try using recursive algorithm
+	//The currentHeight starts at 1 (the root) and the page index starts at rootPid
+    //return locateRec(searchKey, cursor, 1, rootPid);
 }
 
 //Recursive function to locate where the search key belongs
 //Runs until we hit the base case of finding the search key's corresponding leaf node
 RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid) {
-	//Safety check to ensure keys are not negative
-	if(searchKey < 0) {
+	//Keys are assumed to be non-zero, but we can check it anyway
+	if(searchKey<0)
 		return RC_INVALID_ATTRIBUTE;
-	}
-
+		
+	//If anything breaks along the way, return as error
 	RC error;
-
-	//Base case (leaf node)
-	if(curHeight == treeHeight) {
+	
+	if(curHeight==treeHeight) //Base case when we reach the leaf node (found position for searchKey)
+	{
+		//Initialize eid for returning
 		int eid = -1;
-
-		//Load data for leaf node
+	
+		//Load data for the leaf
 		BTLeafNode leaf;
-		error = leaf.read(nextPid, pf);	//Read the contents of the node
-
-		if(error != 0) {
-			return RC_NO_SUCH_RECORD;
-		}
-
-		//Locate leaf node corresponding to the search key and update eid
-		error = leaf.locate(searchKey, eid);	//Returns either 0 or RC_NO_SUCH_RECORD
-
-		if(error != 0) {
+		error = leaf.read(nextPid, pf);
+		
+		if(error!=0)
 			return error;
-		}
-
-		//Assign to the IndexCursor the values of eid and nextPid
+		
+		//Locate leaf node that corresponds with search key; update eid
+		error = leaf.locate(searchKey, eid);
+		
+		if(error!=0)
+			return error;
+		
+		//Set up the IndexCursor with the found eid and nextPid (which is now current pid)
 		cursor.eid = eid;
 		cursor.pid = nextPid;
+		
+		return 0;
 	}
-
-	//Non-leaf node
-	//load data for the non-leaf node
-	BTNonLeafNode nonLeaf;
-	error = nonLeaf.read(nextPid, pf);
-
-	if(error != 0) {
-		return RC_NO_SUCH_RECORD;
-	}
-
-	//Locate the child node of the search key and update nextPid
-	error = nonLeaf.locateChildPtr(searchKey, nextPid);
-
-	if(error != 0) {
-		return RC_NO_SUCH_RECORD;
-	}
-
-	//Recursive step
-	return locate_recur(searchKey, cursor, curHeight - 1, nextPid);
+	
+	//Otherwise, we're still stuck in a non-leaf node; load data for that middle node
+	BTNonLeafNode midNode;
+	error = midNode.read(nextPid, pf);
+	
+	if(error!=0)
+		return error;
+	
+	//Locate child node to look at next given the search key; update nextPid
+	error = midNode.locateChildPtr(searchKey, nextPid);
+	
+	if(error!=0)
+		return error;
+	
+	//Try locate again recursively in order to reach the correct leaf node (base case)
+	return locate_recur(searchKey, cursor, curHeight-1, nextPid);
 }
 
 /*
@@ -412,40 +409,47 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 
 //This function only prints up to two levels of nodes
 void BTreeIndex::print() {
-	BTLeafNode root;
-	root.read(rootPid, pf);
-	root.print();
-	
-	if(treeHeight > 1) {
+	if(treeHeight==1)
+	{	
+		BTLeafNode root;
+		root.read(rootPid, pf);
+		root.print();
+	}
+	else if(treeHeight>1)
+	{
+		BTNonLeafNode root;
+		root.read(rootPid, pf);
+		root.print();
+		
 		PageId first, rest;
 		memcpy(&first, root.getBuffer(), sizeof(PageId));
-
 		BTLeafNode firstLeaf, leaf;
 		firstLeaf.read(first, pf);
 		firstLeaf.print();
-
-		//Print out the rest of the leaf nodes
-		for(int i = 0; i < root.getKeyCount(); i++) {
-			memcpy(&rest, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
+		
+		//print the rest of the leaf nodes
+		for(int i=0; i<root.getKeyCount(); i++)
+		{
+			memcpy(&rest, root.getBuffer()+12+(8*i), sizeof(PageId));
 			leaf.read(rest, pf);
 			leaf.print();
 		}
-
-		//Print each leaf node's current pid and next pid
+		
+		//print each leaf node's current pid and next pid
 		cout << "----------" << endl;
-
-		for(int i = 0; i < root.getKeyCount(); i++) {
-			if(i == 0) {
+		
+		for(int i=0; i<root.getKeyCount(); i++)
+		{
+			if(i==0)
 				cout << "leaf0 (pid=" << first << ") has next pid: " << firstLeaf.getNextNodePtr() << endl;
-			}
-
+		
 			BTLeafNode tempLeaf;
 			PageId tempPid;
-			memcpy(&tempPid, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
-
-			tempLeaf.read(tempPid, pf);
-
-			cout << "leaf" << i + 1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl; 
- 		}
-	}
+			memcpy(&tempPid, root.getBuffer()+12+(8*i), sizeof(PageId));
+		
+			tempLeaf.read(tempPid, pf);;
+			
+			cout << "leaf" << i+1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl;
+		}
+	}	
 }

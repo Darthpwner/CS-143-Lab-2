@@ -142,6 +142,9 @@ class BTNonLeafNode {
      */
     BTNonLeafNode();
 
+    //Getter for the buffer private data member
+    char* getBuffer();  
+
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.

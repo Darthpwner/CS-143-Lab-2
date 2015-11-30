@@ -67,59 +67,76 @@ int BTLeafNode::getKeyCount() {
  * @return 0 if successful. Return an error code if the node is full.
  */
 RC BTLeafNode::insert(int key, const RecordId& rid) {
-	//Store the last 4 bytes (the pid) to rebuild the inserted leaf node later
+	//Save last 4 bytes (the pid) for reconstructing the inserted leaf
 	PageId nextNodePtr = getNextNodePtr();
-
-	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
-	//We can fit 1024/12 == 85 with 4 bytes left over
-	if(getKeyCount() + 1 > NUM_OF_TOTAL_PAIRS) {	//Return an error code if the null is full.
+	
+	//This is the size in bytes of an entry pair
+	int pairSize = sizeof(RecordId) + sizeof(int);
+	
+	//Return error if no more space in this node
+	//Page has 1024 bytes, we need to store 12 bytes (key, rid)
+	//That means we can fit 85 with 4 bytes left over for pid pointer to next leaf node
+	//Check if adding one more (key, rid) pair will exceed the size limit of 85
+	int numTotalPairs = (PageFile::PAGE_SIZE-sizeof(PageId))/pairSize;
+	if(getKeyCount()+1 > numTotalPairs) //if(getKeyCount()+1 > 85)
+	{
+		//cout << "Cannot insert anymore: this node is full!" << endl;
 		return RC_NODE_FULL;
 	}
-
-	//Temporary buffer holds the buffer's original stored keys and manipulates how to add a new key.
-	char* tempBuffer = buffer;
-
-	//Otherwise, go through the buffer's keys to see where to store the new node
-	//1008 is the largest index at which we can store a new node since we do not have enough memory at 1020
-	int i = 0;
-	for(; i < LARGEST_INDEX; i += PAIR_SIZE) {
-		int insertKey;
-		memcpy(&insertKey, tempBuffer, sizeof(int));	//Save the insertKey inside tempBuffer
-
-		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
-		if(insertKey == 0 || key <= insertKey) {
+	
+	//Now we must go through the buffer's sorted keys to see where the new key goes
+	char* temp = buffer;
+	
+	//Loop through all the indexes in the temp buffer; increment by 12 bytes to jump to next key
+	//1008 is the largest possible index of the next inserted pair (since we already know we can fit another pair)
+	
+	int i;
+	for(i=0; i<1008; i+=pairSize)
+	{
+		int insideKey;
+		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+		
+		//Once the insideKey is null or key is smaller than some inside key, we stop
+		if(insideKey==0 || !(key > insideKey))
 			break;
-		}
-
-		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
+		
+		temp += pairSize; //Jump temp over to the next key
 	}
-
-	//After we perform our check to see for free space, index i has the appropriate index of where to insert the pair
-	char* newBuffer = (char*) malloc (PageFile::PAGE_SIZE);
-	fill(newBuffer, newBuffer + PageFile::PAGE_SIZE, 0);	//Clear the buffer as appropriate
-
-	//Copy all values from buffer into new Buffer up until i
+	
+	//At this point, variable i holds the index to insert the pair and temp is the buffer at that index
+	char* newBuffer = (char*)malloc(PageFile::PAGE_SIZE);
+	std::fill(newBuffer, newBuffer + PageFile::PAGE_SIZE, 0); //clear the buffer if necessary
+	
+	//Copy all values from buffer into newBuffer up until i
 	memcpy(newBuffer, buffer, i);
-
+	
 	//Values to insert as new (key, rid) pair
-	PageId pid = rid.sid;
+	PageId pid = rid.pid;
 	int sid = rid.sid;
-
-	memcpy(newBuffer + i, &key, sizeof(int));
-	memcpy(newBuffer + i + sizeof(int), &rid, sizeof(RecordId));
-
-	//The remaining memcpy operations will copy the remaining values into newBuffer
-	//Neglecting the results of nextNodePtr. This needs to be manually copied in!
-	memcpy(newBuffer + i + PAIR_SIZE, buffer + i, getKeyCount() * PAIR_SIZE - i);
-	memcpy(newBuffer + PageFile::PAGE_SIZE - sizeof(PageId), &nextNodePtr, sizeof(PageId));
-
-	//Copy the newBuffer into buffer, then delete temporary newBuffer to prevent any memory leaks
+	
+	memcpy(newBuffer+i, &key, sizeof(int));
+	memcpy(newBuffer+i+sizeof(int), &rid, sizeof(RecordId));
+	
+	//INCREMENTAL POINTER METHOD:
+	//char* insertPos = newBuffer+i;
+	//memcpy(insertPos, &pid, sizeof(PageId));
+	//insertPos += sizeof(PageId);
+	//memcpy(insertPos, &sid, sizeof(int));
+	//insertPos += sizeof(int);
+	//memcpy(insertPos, &key, sizeof(int));
+	
+	//Copy the rest of the values into newBuffer
+	//Notice that we are neglecting nextNodePtr, so we'll manually copy that in
+	memcpy(newBuffer+i+pairSize, buffer+i, getKeyCount()*pairSize - i);
+	memcpy(newBuffer+PageFile::PAGE_SIZE-sizeof(PageId), &nextNodePtr, sizeof(PageId));
+	
+	//Copy newBuffer into buffer, then delete temporary newBuffer to prevent memory leak
 	memcpy(buffer, newBuffer, PageFile::PAGE_SIZE);
 	free(newBuffer);
-
-	//Successively inserted leaf node, so we increment number of keys
+	
+	//Successfully inserted leaf node, so we increment number of keys
 	numKeys++;
-
+	
 	return 0;
 }
 
@@ -207,37 +224,33 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 
  //THIS MIGHT NEED FIXING
 RC BTLeafNode::locate(int searchKey, int& eid) {
-	char* tempBuffer = buffer;
-
-	//Loop through all the indices in the tempBuffer and incremeny by 12 bytes to jump to the next key
-	int i = 0;
-	for(; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
-		int key;
-		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key inside buffer
-
-		if(key == searchKey) {
-			//eid = current byte index divided by size of a a pair entry
-			eid = i/PAIR_SIZE;
+	//This is the size in bytes of an entry pair
+	int pairSize = sizeof(RecordId) + sizeof(int);
+	
+	char* temp = buffer;
+	
+	//Loop through all the indexes in the temp buffer; increment by 12 bytes to jump to next key	
+	int i;
+	for(i=0; i<getKeyCount()*pairSize; i+=pairSize)
+	{
+		int insideKey;
+		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+		
+		//Once insideKey is larger than or equal to searchKey
+		if(insideKey >= searchKey)
+		{
+			//Set eid to the current byte index divided by size of a pair entry
+			//This effectively produces eid
+			eid = i/pairSize;
 			return 0;
-		} else if(key < searchKey) {	//Jump by PAIR_SIZE and make another comparison
-			eid += PAIR_SIZE;
-		} else {
-			break;
 		}
-
-		// //If the key is larger than or equal to the searchKey, set eid
-		// if(key >= searchKey) {
-		// 	//eid = current byte index divided by size of a pair entry
-		// 	eid = i/PAIR_SIZE;
-		// 	return 0;
-		// }
-
-		tempBuffer += PAIR_SIZE;
+		
+		temp += pairSize; //Jump temp over to the next key
 	}
-
-	//If we reach this point, we checked every entry of the node and could not find the searchKey
-	//eid = getKeyCount();
-	return RC_NO_SUCH_RECORD;
+	
+	//If we get here, all of the keys inside the buffer were less than searchKey
+	eid = getKeyCount();
+	return 0;
 }
 
 /*
@@ -309,18 +322,22 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
  *   Print the keys of the node
 */
 void BTLeafNode::print() {
-	char* tempBuffer = buffer;
-
-	for(int i = 0; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
-		int key;
-		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key into temp buffer
-
-		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair
-
-		tempBuffer += PAIR_SIZE;	//tempBuffer jumps to the next key
+	//This is the size in bytes of an entry pair
+	int pairSize = sizeof(RecordId) + sizeof(int);
+	
+	char* temp = buffer;
+	
+	for(int i=0; i<getKeyCount()*pairSize; i+=pairSize)
+	{
+		int insideKey;
+		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+		
+		cout << insideKey << " ";
+		
+		temp += pairSize; //Jump temp over to the next key
 	}
-
-	cout << endl;
+	
+	cout << "" << endl;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -352,6 +369,11 @@ RC BTNonLeafNode::read(PageId pid, const PageFile& pf) {
  */
 RC BTNonLeafNode::write(PageId pid, PageFile& pf) {
   return pf.write(pid, buffer); /*Use PageFile to write from buffer into selected page*/
+}
+
+//Getter for the buffer private data member
+char* BTNonLeafNode::getBuffer() {
+	return buffer;
 }
 
 /*
@@ -608,15 +630,22 @@ RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2) {
  * Print the keys of the node to cout
  */
 void BTNonLeafNode::print() {
-  /* once again, Nonleaf node: skip first 8 bytes as offset */
-  char* tmp_bufIndex = buffer + 8;
-  int i;
-  /* traverse through and print out insideKey */
-  for (i = 8; i < getKeyCount()*PAIR_SIZE + 8; i += PAIR_SIZE) {
-    int tmp_Key;
-    memcpy(&tmp_Key, tmp_bufIndex, sizeof(int));
-    cout << tmp_Key << " ";
-    tmp_bufIndex += PAIR_SIZE;
-  }
-  cout << "" << endl;
+	//This is the size in bytes of an entry pair
+	int pairSize = sizeof(PageId) + sizeof(int);
+	
+	//Skip the first 8 offset bytes, since there's no key there
+	char* temp = buffer+8;
+	
+	for(int i=8; i<getKeyCount()*pairSize+8; i+=pairSize)
+	{
+		int insideKey;
+		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+
+		cout << insideKey << " ";
+		
+		//Otherwise, searchKey is greater than or equal to insideKey, so we keep checking
+		temp += pairSize; //Jump temp over to the next key
+	}
+	
+	cout << "" << endl;	
 }
