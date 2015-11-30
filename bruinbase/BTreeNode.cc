@@ -224,34 +224,29 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 
  //THIS MIGHT NEED FIXING
 RC BTLeafNode::locate(int searchKey, int& eid) {
-	//This is the size in bytes of an entry pair
-	int pairSize = sizeof(RecordId) + sizeof(int);
-	
-	char* temp = buffer;
-	
-	//Loop through all the indexes in the temp buffer; increment by 12 bytes to jump to next key	
-	int i;
-	for(i=0; i<getKeyCount()*pairSize; i+=pairSize)
-	{
-		int insideKey;
-		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
-		
-		//Once insideKey is larger than or equal to searchKey
-		if(insideKey >= searchKey)
-		{
-			//Set eid to the current byte index divided by size of a pair entry
-			//This effectively produces eid
-			eid = i/pairSize;
+	char* tempBuffer = buffer;
+
+	//Loop through all the indices in the tempBuffer and incremeny by 12 bytes to jump to the next key
+	int i = 0;
+	for(; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
+		int key;
+		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key inside buffer
+
+		//If the key is larger than or equal to the searchKey, set eid
+		if(key >= searchKey) {
+			//eid = current byte index divided by size of a pair entry
+			eid = i/PAIR_SIZE;
 			return 0;
 		}
-		
-		temp += pairSize; //Jump temp over to the next key
+
+		tempBuffer += PAIR_SIZE;
 	}
-	
-	//If we get here, all of the keys inside the buffer were less than searchKey
+
+	//If we reach this point, every key inside the buffer was less than the searchKey parameter
 	eid = getKeyCount();
 	return 0;
 }
+
 
 /*
  * Read the (key, rid) pair from the eid entry.
