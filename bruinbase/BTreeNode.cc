@@ -56,6 +56,7 @@ int BTLeafNode::getKeyCount() {
 		tempBuffer += PAIR_SIZE;	//Jump to the next key (8 bytes away) in the temporary buffer 
 	}
 
+	cout << keyCount << "\n";
 	return keyCount;
 }
 
@@ -119,6 +120,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid) {
 	//Successively inserted leaf node, so we increment number of keys
 	numKeys++;
 
+	cout << numKeys << endl;
 	return 0;
 }
 

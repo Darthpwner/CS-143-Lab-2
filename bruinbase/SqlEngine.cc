@@ -167,8 +167,10 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   //Create an empty file with the "table" variable as the name with the .tbl suffix  
   rc = rf.open(table + ".tbl", 'w');  //If file does not exist in 'w' mode, it is created and stored into rc
 
+  string arr[5] = {"a", "b", "c", "d", "e"};
   //Implement code for Part 2D here
   //If index == true, Bruinbase creates the corresponding B+ tree index on the key column of the table
+/*
   if(index) {
     //Open and write to BTreeIndex as <tblname>.idx
     treeIndex.open(table + ".idx", 'w');
@@ -189,13 +191,20 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
     //Close BTreeIndex to prevent unexpected bugs after using it.
     treeIndex.close();
   }
+  */
   //
 
+for(int i = 0; i < 5; i++) {
+  key = i;
+  value = arr[i];
+  rc = rf.append(key, value, rid);
+}
+
   //Loop while we still have lines in tableData (indicated by \n) and stop when we reach the zero byte (\0)
-  while(getline(tableData, line)) {
+ /* while(getline(tableData, line)) {
     parseLoadLine(line, key, value);  //Parses each line of the loadfile to read a tuple
     rc = rf.append(key, value, rid);  //Append the records to the load file to the end of the table
-  }
+  }*/
   
   //Close the Record File and the table to prevent unexpected bugs after using it.
   rf.close();
