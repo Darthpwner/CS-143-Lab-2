@@ -122,6 +122,13 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("write: %d\n", nonLeaf2.write(pidPtr, pf));  //Why does this give an error
   printf("getKey: %d\n", nonLeaf2.getKeyCount());  //0
   printf("insert: %d\n", nonLeaf2.insert(3, pid));  //3
+  printf("getKey: %d\n", nonLeaf2.getKeyCount());  //1
+  printf("insert: %d\n", nonLeaf2.insert(39, pid));  //0
+  printf("insert: %d\n", nonLeaf2.insert(326, pid));  //0
+  printf("insert: %d\n", nonLeaf2.insert(101, pid));  //0
+  printf("getKey: %d\n", nonLeaf2.getKeyCount());  //4
+  nonLeaf2.print();
+  
   printf("insertAndSplit: %d\n", nonLeaf2.insertAndSplit(4, pid, nonLeaf, midKey));
   printf("locateChildPtr: %d\n", nonLeaf2.locateChildPtr(3, pid));  //3
   printf("initializeRoot: %d\n", nonLeaf2.initializeRoot(pidPtr, 20, pidPtr1));  
