@@ -73,10 +73,12 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("%d\n", a); //Prints 0 Success!
   printf("%d\n", c); //Prints 0 Success!
   printf("%d\n", leaf.getKeyCount()); //Prints 6
-  //leaf.insert(20, rid);
-  //leaf.insert(32, rid);
+  leaf.insert(20, rid);
+  leaf.insert(32, rid);
 
-  leaf.print(); //WHY DOES THIS GIVE SOME WEIRD ASCII?
+  printf("HERE ARE THE LEAVES: ");
+  leaf.print(); //NOT PRINTING ANYTHING?
+  printf("Key count: %d\n", leaf.getKeyCount());
 
   nonLeaf.print();
   printf("\n");
@@ -93,8 +95,12 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("BTLeafNode:\n");
   printf("read: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
   printf("write: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
-  printf("getKey: %d\n", leaf.getKeyCount());  //Why does this return 6?
+  printf("getKey: %d\n", leaf.getKeyCount());  //4
   printf("insert: %d\n", leaf.insert(5, rid));  //Why does this give an error
+  printf("getKey: %d\n", leaf.getKeyCount());  //5
+  printf("insert: %d\n", leaf.insert(0, rid));  //Why does this give an error
+  printf("getKey: %d\n", leaf.getKeyCount());  //6
+
   printf("insertAndSplit: %d\n", leaf.insertAndSplit(7, rid, leaf, myKey));  //Why does this give an error
   printf("locate: %d\n", leaf.locate(5, eid));  //Should return 0 :)
   printf("eid has value: %d\n", eid);
