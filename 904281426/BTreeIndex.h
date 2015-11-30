@@ -33,6 +33,10 @@ typedef struct {
  */
 class BTreeIndex {
  public:
+  static const int BYTE_SIZE = 8;
+  static const int OFFSET = 12;
+  static const int ROOT_HEIGHT = 1;
+
   BTreeIndex();
 
   /**
@@ -59,6 +63,11 @@ class BTreeIndex {
   RC insert(int key, const RecordId& rid);
 
   /**
+   * Recursive function to insert key into the correct Nonleaf and leaf nodes
+   */
+  RC insert_recur(int key, const RecordId& rid, int curHeight, PageId curPid, int& tmpKey, PageId& tmpPid);
+
+  /**
    * Run the standard B+Tree key search algorithm and identify the
    * leaf node where searchKey may exist. If an index entry with
    * searchKey exists in the leaf node, set IndexCursor to its location 
@@ -79,6 +88,11 @@ class BTreeIndex {
   RC locate(int searchKey, IndexCursor& cursor);
 
   /**
+  * Recursive function to locate where the search key belongs
+  */
+  RC locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid);
+
+  /**
    * Read the (key, rid) pair at the location specified by the index cursor,
    * and move foward the cursor to the next entry.
    * @param cursor[IN/OUT] the cursor pointing to an leaf-node index entry in the b+tree
@@ -87,6 +101,9 @@ class BTreeIndex {
    * @return error code. 0 if no error
    */
   RC readForward(IndexCursor& cursor, int& key, RecordId& rid);
+
+  //Used for testing purposes
+  void print();
   
  private:
   PageFile pf;         /// the PageFile used to store the actual b+tree in disk
@@ -97,6 +114,9 @@ class BTreeIndex {
   /// this class is destructed. Make sure to store the values of the two 
   /// variables in disk, so that they can be reconstructed when the index
   /// is opened again later.
+
+  /// buffer with pid = 0 to store rootPid and treeHeight in disk
+  char buffer[PageFile::PAGE_SIZE];
 };
 
 #endif /* BTREEINDEX_H */
