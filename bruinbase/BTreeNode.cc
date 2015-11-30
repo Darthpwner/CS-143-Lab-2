@@ -7,6 +7,7 @@ using namespace std;
 
 BTLeafNode::BTLeafNode() {
 	numKeys = 0;
+	fill(buffer, buffer + PageFile::PAGE_SIZE, 0); //clear the buffer initially
 }
 
 //Getter for the buffer private data member

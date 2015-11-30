@@ -22,7 +22,7 @@ int main()
   //printf("HELLO WORLD\n");
   BTreeIndex b;
   BTLeafNode leaf;
-  printf("%d\n", leaf.getKeyCount()); //Appears there are originally 4 leaves?
+  printf("Keys for leaves: %d\n", leaf.getKeyCount()); //Appears there are originally 4 leaves?
   BTNonLeafNode nonLeaf;
   BTNonLeafNode nonLeaf1;
 
