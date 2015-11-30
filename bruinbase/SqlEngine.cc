@@ -14,6 +14,7 @@
 #include <fstream>
 #include "Bruinbase.h"
 #include "SqlEngine.h"
+#include "BTreeIndex.h"
 
 using namespace std;
 
@@ -147,13 +148,12 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
   RC rc;  //RC means error code
   RecordFile rf;   // RecordFile containing the table
   RecordId   rid;  // record cursor for table scanning
+  BTreeIndex treeIndex; //Used to implement indexing to speed up queries
 
   //Key value pair stored at each record
   string line;  //A line from a load file (string)
   int    key; //The key field of the tuple in the line (integer)
   string value; //The value field of the tuple in the line (string)
-
-  //For Part A, assume index is always FALSE
 
   //Use any standard C++ file I/O functions to read the loadfile i.e. fstream
   //ifstream is limits the I/O to input only
