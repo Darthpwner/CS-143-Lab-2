@@ -254,63 +254,20 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 	//Verify this function works
 RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
 {
-	RC error;	
-	BTNonLeafNode midNode;
-	BTLeafNode leaf;
-	
-	int eid;
-	int currHeight = 1;
-	PageId nextPid = rootPid;
-	
-	while(currHeight!=treeHeight)
-	{
-		error = midNode.read(nextPid, pf);
-		
-		if(error!=0)
-			return error;
-		
-		//Locate child node to look at next given the search key; update nextPid
-		error = midNode.locateChildPtr(searchKey, nextPid);
-		
-		if(error!=0)
-			return error;
-		
-		currHeight++;
-	}
-	
-	error = leaf.read(nextPid, pf);
-		
-	if(error!=0)
-		return error;
-	
-	//Locate leaf node that corresponds with search key; update eid
-	error = leaf.locate(searchKey, eid);
-	
-	if(error!=0)
-		return error;
-	
-	//Set up the IndexCursor with the found eid and nextPid (which is now current pid)
-	cursor.eid = eid;
-	cursor.pid = nextPid;
-	
-	return 0;
-	
-	//Try using recursive algorithm
-	//The currentHeight starts at 1 (the root) and the page index starts at rootPid
-    //return locateRec(searchKey, cursor, 1, rootPid);
+    return locate_recur(searchKey, cursor, 1, rootPid);
 }
 
 //Recursive function to locate where the search key belongs
 //Runs until we hit the base case of finding the search key's corresponding leaf node
 RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, PageId& nextPid) {
 	//Keys are assumed to be non-zero, but we can check it anyway
-	if(searchKey<0)
+	if(searchKey < 0)
 		return RC_INVALID_ATTRIBUTE;
 		
 	//If anything breaks along the way, return as error
 	RC error;
 	
-	if(curHeight==treeHeight) //Base case when we reach the leaf node (found position for searchKey)
+	if(curHeight == treeHeight) //Base case when we reach the leaf node (found position for searchKey)
 	{
 		//Initialize eid for returning
 		int eid = -1;
@@ -334,6 +291,7 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 		
 		return 0;
 	}
+
 	
 	//Otherwise, we're still stuck in a non-leaf node; load data for that middle node
 	BTNonLeafNode midNode;
@@ -349,7 +307,7 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 		return error;
 	
 	//Try locate again recursively in order to reach the correct leaf node (base case)
-	return locate_recur(searchKey, cursor, curHeight-1, nextPid);
+	return locate_recur(searchKey, cursor, curHeight + 1, nextPid);
 }
 
 /*
