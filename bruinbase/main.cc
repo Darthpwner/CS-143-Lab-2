@@ -86,6 +86,8 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   //b.insert(10, 'good');
  // RecordFile::append(10, 'good');
   // b.print();
+
+  printf("TEST PART B MOFO\n");
 	//END TESTING PURPOSES
 
   // run the SQL engine taking user commands from standard input (console).
