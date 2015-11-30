@@ -111,9 +111,9 @@ int main()
 //   printf("locate: %d\n", leaf.locate(7, eid));  //Why does this give an error
 //   printf("eid has value: %d\n", eid);
   
-  printf("insertAndSplit: %d\n", nonLeaf2.insertAndSplit(4, pid, nonLeaf, midKey));
-  printf("locateChildPtr: %d\n", nonLeaf2.locateChildPtr(3, pid));  //3
-  printf("initializeRoot: %d\n", nonLeaf2.initializeRoot(pidPtr, 20, pidPtr1));  
+  // printf("insertAndSplit: %d\n", nonLeaf2.insertAndSplit(4, pid, nonLeaf, midKey));
+  // printf("locateChildPtr: %d\n", nonLeaf2.locateChildPtr(3, pid));  //3
+  // printf("initializeRoot: %d\n", nonLeaf2.initializeRoot(pidPtr, 20, pidPtr1));  
 
 
 //  printf("readEntry: %d\n", leaf.readEntry(eid));
@@ -123,36 +123,36 @@ int main()
 
   /* Frank's Testing */
   //TESTING BELOW IS FOR BTreeNode
-  std::cout << sizeof(RecordId) + sizeof(int) << std::endl; //size 12
-  std::cout << sizeof(PageId) << std::endl; //size 4
+  // std::cout << sizeof(RecordId) + sizeof(int) << std::endl; //size 12
+  // std::cout << sizeof(PageId) << std::endl; //size 4
    
-  //Initialize new leaf node
-  BTLeafNode poop;
-  std::cout << "Initial key count: " << poop.getKeyCount() << std::endl;
+  // //Initialize new leaf node
+  // BTLeafNode poop;
+  // std::cout << "Initial key count: " << poop.getKeyCount() << std::endl;
   
-  int zeroPls;
+  // int zeroPls;
   
   
-  //Try stuffing our node with (key, rid) pairs until node is full
-  RecordId poopRid = {1,2};
-  for(int i=0; i<86; i++)
-  {
-    zeroPls = poop.insert(5, poopRid);
-    std::cout << "Am I zero? " << zeroPls << std::endl;
-    poop.print();
-  }
+  // //Try stuffing our node with (key, rid) pairs until node is full
+  // RecordId poopRid = {1,2};
+  // for(int i=0; i<86; i++)
+  // {
+  //   zeroPls = poop.insert(5, poopRid);
+  //   std::cout << "Am I zero? " << zeroPls << std::endl;
+  //   poop.print();
+  // }
   
-  std::cout << "Final key count: " << poop.getKeyCount() << std::endl;
+  // std::cout << "Final key count: " << poop.getKeyCount() << std::endl;
 
-  //Test location by finding key with 5
-  int eid = -1;
-  poop.locate(5, eid);
-  std::cout << "Found key=5 at eid: " << eid << std::endl;
+  // //Test location by finding key with 5
+  // int eid = -1;
+  // poop.locate(5, eid);
+  // std::cout << "Found key=5 at eid: " << eid << std::endl;
   
-  //Test location by finding key with 6 (doesn't exist - should be -1)
-  int eid2 = -1;
-  poop.locate(6, eid2);
-  std::cout << "Found key=6 at eid2: " << eid2 << std::endl;
+  // //Test location by finding key with 6 (doesn't exist - should be -1)
+  // int eid2 = -1;
+  // poop.locate(6, eid2);
+  // std::cout << "Found key=6 at eid2: " << eid2 << std::endl;
   // run the SQL engine taking user commands from standard input (console).
   SqlEngine::run(stdin);
 
