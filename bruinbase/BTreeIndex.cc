@@ -94,6 +94,8 @@ RC BTreeIndex::close()
  */
 RC BTreeIndex::insert(int key, const RecordId& rid)
 {
+	cout << "I LIKE PUSSY\n";
+
     if (key < 0)
     	return RC_INVALID_ATTRIBUTE;
     /* if tree doesn't exist, we start from root */
@@ -118,6 +120,8 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
     PageId insertPid = -1;
     RC error;
     error = insert_recur(key, rid, 1, rootPid, insertKey, insertPid);
+
+    cout << error << "\n";
     if (error != 0)
     	return error;
     /* successfully inserted */
