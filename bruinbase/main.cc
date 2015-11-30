@@ -93,10 +93,10 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("BTLeafNode:\n");
   printf("read: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
   printf("write: %d\n", leaf.read(pidPtr, pf));  //Why does this give an error
-  printf("getKey: %d\n", leaf.getKeyCount());  //Why does this give an error
+  printf("getKey: %d\n", leaf.getKeyCount());  //Why does this return 6?
   printf("insert: %d\n", leaf.insert(5, rid));  //Why does this give an error
   printf("insertAndSplit: %d\n", leaf.insertAndSplit(7, rid, leaf, myKey));  //Why does this give an error
-  printf("locate: %d\n", leaf.locate(5, eid));  //Why does this give an error
+  printf("locate: %d\n", leaf.locate(5, eid));  //Should return 0 :)
   printf("eid has value: %d\n", eid);
   printf("locate: %d\n", leaf.locate(-100, eid));  //Why does this give an error
   printf("eid has value: %d\n", eid);
