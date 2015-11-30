@@ -21,6 +21,7 @@ int main()
 {
 	//TESTING PURPOSES
   //printf("HELLO WORLD\n");
+
 //   BTreeIndex b;
 //   BTLeafNode leaf;
 //   printf("Keys for leaves: %d\n", leaf.getKeyCount()); //Appears there are originally 4 leaves?
@@ -110,6 +111,10 @@ int main()
 //   printf("locate: %d\n", leaf.locate(7, eid));  //Why does this give an error
 //   printf("eid has value: %d\n", eid);
   
+  printf("insertAndSplit: %d\n", nonLeaf2.insertAndSplit(4, pid, nonLeaf, midKey));
+  printf("locateChildPtr: %d\n", nonLeaf2.locateChildPtr(3, pid));  //3
+  printf("initializeRoot: %d\n", nonLeaf2.initializeRoot(pidPtr, 20, pidPtr1));  
+
 
 //  printf("readEntry: %d\n", leaf.readEntry(eid));
 
