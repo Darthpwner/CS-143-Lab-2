@@ -113,7 +113,8 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("eid has value: %d\n", eid);
   printf("locate: %d\n", leaf.locate(7, eid));  //Why does this give an error
   printf("eid has value: %d\n", eid);
-  
+ 
+  printf("\n"); 
   printf("BTNonLeafNode:\n");
   BTNonLeafNode nonLeaf2;
   int midKey;
