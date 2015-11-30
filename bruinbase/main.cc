@@ -99,7 +99,7 @@ printf("%d\n", leaf.getKeyCount()); //Prints 4
   printf("insert: %d\n", leaf.insert(5, rid));  //Why does this give an error
   printf("getKey: %d\n", leaf.getKeyCount());  //5
   printf("insert: %d\n", leaf.insert(0, rid));  //Why does this give an error
-  printf("getKey: %d\n", leaf.getKeyCount());  //6
+  printf("getKey: %d\n", leaf.getKeyCount());  //0
 
   printf("insertAndSplit: %d\n", leaf.insertAndSplit(7, rid, leaf, myKey));  //Why does this give an error
   printf("locate: %d\n", leaf.locate(5, eid));  //Should return 0 :)
