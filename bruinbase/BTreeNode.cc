@@ -298,24 +298,25 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 /*
  *   Print the keys of the node
 */
-void BTLeafNode::print() {
-	//This is the size in bytes of an entry pair
-	int pairSize = sizeof(RecordId) + sizeof(int);
+ //Testing function
+// void BTLeafNode::print() {
+// 	//This is the size in bytes of an entry pair
+// 	int pairSize = sizeof(RecordId) + sizeof(int);
 	
-	char* temp = buffer;
+// 	char* temp = buffer;
 	
-	for(int i=0; i<getKeyCount()*pairSize; i+=pairSize)
-	{
-		int insideKey;
-		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+// 	for(int i=0; i<getKeyCount()*pairSize; i+=pairSize)
+// 	{
+// 		int insideKey;
+// 		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
 		
-		cout << insideKey << " ";
+// 		cout << insideKey << " ";
 		
-		temp += pairSize; //Jump temp over to the next key
-	}
+// 		temp += pairSize; //Jump temp over to the next key
+// 	}
 	
-	cout << "" << endl;
-}
+// 	cout << "" << endl;
+// }
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -606,23 +607,24 @@ RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2) {
 /*
  * Print the keys of the node to cout
  */
-void BTNonLeafNode::print() {
-	//This is the size in bytes of an entry pair
-	int pairSize = sizeof(PageId) + sizeof(int);
+ //Test function
+// void BTNonLeafNode::print() {
+// 	//This is the size in bytes of an entry pair
+// 	int pairSize = sizeof(PageId) + sizeof(int);
 	
-	//Skip the first 8 offset bytes, since there's no key there
-	char* temp = buffer+8;
+// 	//Skip the first 8 offset bytes, since there's no key there
+// 	char* temp = buffer+8;
 	
-	for(int i=8; i<getKeyCount()*pairSize+8; i+=pairSize)
-	{
-		int insideKey;
-		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+// 	for(int i=8; i<getKeyCount()*pairSize+8; i+=pairSize)
+// 	{
+// 		int insideKey;
+// 		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
 
-		cout << insideKey << " ";
+// 		cout << insideKey << " ";
 		
-		//Otherwise, searchKey is greater than or equal to insideKey, so we keep checking
-		temp += pairSize; //Jump temp over to the next key
-	}
+// 		//Otherwise, searchKey is greater than or equal to insideKey, so we keep checking
+// 		temp += pairSize; //Jump temp over to the next key
+// 	}
 	
-	cout << "" << endl;	
-}
+// 	cout << "" << endl;	
+// }

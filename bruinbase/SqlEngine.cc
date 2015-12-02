@@ -380,13 +380,12 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 
     //Close BTreeIndex to prevent unexpected bugs after using it.
     treeIndex.close();
-  }
-  //
-
-  //Loop while we still have lines in tableData (indicated by \n) and stop when we reach the zero byte (\0)
-  while(getline(tableData, line)) {
-    parseLoadLine(line, key, value);  //Parses each line of the loadfile to read a tuple
-    rc = rf.append(key, value, rid);  //Append the records to the load file to the end of the table
+  } else {
+      //Loop while we still have lines in tableData (indicated by \n) and stop when we reach the zero byte (\0)
+      while(getline(tableData, line)) {
+        parseLoadLine(line, key, value);  //Parses each line of the loadfile to read a tuple
+        rc = rf.append(key, value, rid);  //Append the records to the load file to the end of the table
+    }
   }
   
   //Close the Record File and the table to prevent unexpected bugs after using it.

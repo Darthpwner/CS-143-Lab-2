@@ -114,7 +114,7 @@ class BTLeafNode {
     /*
     *   Print the keys of the node
     */
-    void print();
+   // void print();
 
   private:
     int numKeys;    /*Number of keys that a leaf can hold*/
@@ -212,7 +212,7 @@ class BTNonLeafNode {
     /**
      * Print the keys of the node to cout
      */
-     void print();
+    // void print();
 
   private:
     int numKeys; /* declare the variables that a NONLEAF must hold */
