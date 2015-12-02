@@ -60,9 +60,9 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   bool cond_exist = false;    /* check if any valid select conditions exist */
   bool valcond_exist = false; /* chek if any value select conditions exist */
   bool index_exist = false;   /* we assume B+ tree is not used unless specified */
+  bool cond_GE = false; /* if true, that means that key >= min */
+  bool cond_LE = false; /* if true, that means that key <= max */
 
-  bool cond_GE = false; /* if true, key >= min */
-  bool cond_LE = false; /* if true, key <= max */
   int max = -1;
   int min = -1;
   int equalVal = -1; 
@@ -133,8 +133,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   if(tree.open(table + ".idx", 'r')!=0 || (!cond_exist && attr!=4))
   {
       // scan the table file from the beginning
-      rid.pid = rid.sid = 0;
       count = 0;
+      rid.pid = rid.sid = 0;
       while (rid < rf.endRid()) {
         // read the tuple
         if ((rc = rf.read(rid, key, value)) < 0) {
@@ -147,33 +147,33 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           // compute the difference between the tuple value and the condition value
           switch (cond[i].attr) {
           case 1:
-      diff = key - atoi(cond[i].value);
-      break;
-          case 2:
-      diff = strcmp(value.c_str(), cond[i].value);
-      break;
+            diff = key - atoi(cond[i].value);
+            break;
+                case 2:
+            diff = strcmp(value.c_str(), cond[i].value);
+            break;
           }
 
           // skip the tuple if any condition is not met
           switch (cond[i].comp) {
           case SelCond::EQ:
-      if (diff != 0) goto next_tuple;
-      break;
-          case SelCond::NE:
-      if (diff == 0) goto next_tuple;
-      break;
-          case SelCond::GT:
-      if (diff <= 0) goto next_tuple;
-      break;
-          case SelCond::LT:
-      if (diff >= 0) goto next_tuple;
-      break;
-          case SelCond::GE:
-      if (diff < 0) goto next_tuple;
-      break;
-          case SelCond::LE:
-      if (diff > 0) goto next_tuple;
-      break;
+            if (diff != 0) goto next_tuple;
+            break;
+                case SelCond::NE:
+            if (diff == 0) goto next_tuple;
+            break;
+                case SelCond::GT:
+            if (diff <= 0) goto next_tuple;
+            break;
+                case SelCond::LT:
+            if (diff >= 0) goto next_tuple;
+            break;
+                case SelCond::GE:
+            if (diff < 0) goto next_tuple;
+            break;
+                case SelCond::LE:
+            if (diff > 0) goto next_tuple;
+            break;
           }
         }
 
@@ -289,7 +289,6 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
             break;
         }
       }
-
       /* increment count because we matched conditions */
       count++;
 
@@ -309,9 +308,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       cout << "";
     }
   }    
-
-  end_select_early:
-
+  end_select_early: /* goto statement */
   // print matching tuple count if "select count(*)"
   if (attr == 4) {
     fprintf(stdout, "%d\n", count);
@@ -379,7 +376,7 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
     }
 
     //Used for debugging, verify this
-    treeIndex.print();
+    // treeIndex.print();
 
     //Close BTreeIndex to prevent unexpected bugs after using it.
     treeIndex.close();
