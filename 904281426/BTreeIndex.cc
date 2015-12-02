@@ -156,13 +156,13 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
 		tmpKey = key2;
 		tmpPid = lastPid;
 		/* write content into our leaf objects */
-		newLeaf.setNextNodePtr(newLeaf.getNextNodePtr());
-		Leaf2.setNextNodePtr(lastPid);
+		Leaf2.setNextNodePtr(newLeaf.getNextNodePtr());
+		newLeaf.setNextNodePtr(lastPid);
 		/* check for errors */
-		error = newLeaf.write(curPid, pf);
+		error = Leaf2.write(lastPid, pf);
 		if (error != 0)
 			return error;
-		error = Leaf2.write(lastPid, pf);
+		error = newLeaf.write(curPid, pf);
 		if (error != 0)
 			return error;
 
@@ -249,11 +249,8 @@ RC BTreeIndex::insert_recur(int key, const RecordId& rid, int curHeight, PageId 
  *                    smaller than searchKey.
  * @return 0 if searchKey is found. Othewise an error code
  */
-
-//Verify this function works
-RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
-{
-	return locate_recur(searchKey, cursor, ROOT_HEIGHT, rootPid);
+RC BTreeIndex::locate(int searchKey, IndexCursor& cursor){
+    return locate_recur(searchKey, cursor, 1, rootPid);
 }
 
 //Recursive function to locate where the search key belongs
@@ -265,7 +262,7 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 	}
 
 	RC error;
-
+	
 	//Base case (leaf node)
 	if(curHeight == treeHeight) {
 		int eid = -1;
@@ -289,9 +286,9 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 		cursor.eid = eid;
 		cursor.pid = nextPid;
 
-		return 0;
+		return 0;	//This is important as the stopping condition!
 	}
-
+	
 	//Non-leaf node
 	//load data for the non-leaf node
 	BTNonLeafNode nonLeaf;
@@ -309,8 +306,9 @@ RC BTreeIndex::locate_recur(int searchKey, IndexCursor& cursor, int curHeight, P
 	}
 
 	//Recursive step
-	return locate_recur(searchKey, cursor, curHeight - 1, nextPid);
+	return locate_recur(searchKey, cursor, curHeight + 1, nextPid);
 }
+
 
 /*
  * Read the (key, rid) pair at the location specified by the index cursor,
@@ -368,42 +366,48 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 }
 
 //This function only prints up to two levels of nodes
-//Testing purposes
 // void BTreeIndex::print() {
-// 	BTLeafNode root;
-// 	root.read(rootPid, pf);
-// 	root.print();
-	
-// 	if(treeHeight > 1) {
+// 	if(treeHeight==1)
+// 	{	
+// 		BTLeafNode root;
+// 		root.read(rootPid, pf);
+// 		root.print();
+// 	}
+// 	else if(treeHeight>1)
+// 	{
+// 		BTNonLeafNode root;
+// 		root.read(rootPid, pf);
+// 		root.print();
+		
 // 		PageId first, rest;
 // 		memcpy(&first, root.getBuffer(), sizeof(PageId));
-
 // 		BTLeafNode firstLeaf, leaf;
 // 		firstLeaf.read(first, pf);
 // 		firstLeaf.print();
-
-// 		//Print out the rest of the leaf nodes
-// 		for(int i = 0; i < root.getKeyCount(); i++) {
-// 			memcpy(&rest, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
+		
+// 		//print the rest of the leaf nodes
+// 		for(int i=0; i<root.getKeyCount(); i++)
+// 		{
+// 			memcpy(&rest, root.getBuffer()+12+(8*i), sizeof(PageId));
 // 			leaf.read(rest, pf);
 // 			leaf.print();
 // 		}
-
-// 		//Print each leaf node's current pid and next pid
-// 		cout << "-------------------" << endl;
-
-// 		for(int i = 0; i < root.getKeyCount(); i++) {
-// 			if(i == 0) {
+		
+// 		//print each leaf node's current pid and next pid
+// 		cout << "----------" << endl;
+		
+// 		for(int i=0; i<root.getKeyCount(); i++)
+// 		{
+// 			if(i==0)
 // 				cout << "leaf0 (pid=" << first << ") has next pid: " << firstLeaf.getNextNodePtr() << endl;
-// 			}
-
+		
 // 			BTLeafNode tempLeaf;
 // 			PageId tempPid;
-// 			memcpy(&tempPid, root.getBuffer() + OFFSET + (BYTE_SIZE * i), sizeof(PageId));
-
-// 			tempLeaf.read(tempPid, pf);
-
-// 			cout << "leaf" << i + 1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl; 
-//  		}
-// 	}
+// 			memcpy(&tempPid, root.getBuffer()+12+(8*i), sizeof(PageId));
+		
+// 			tempLeaf.read(tempPid, pf);;
+			
+// 			cout << "leaf" << i+1 << " (pid=" << tempPid << ") has next pid: " << tempLeaf.getNextNodePtr() << endl;
+// 		}
+// 	}	
 // }

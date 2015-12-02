@@ -21,13 +21,11 @@ class BTLeafNode {
     static const int LARGEST_INDEX = 1008;  /*1008 is the largest possible index at which we can insert a pair since the max index is 1020
                                             (4 bytes remaining)*/
     static const int PAIR_SIZE = sizeof(RecordId) + sizeof(int);    //This is the size in bytes of an empty pair
-    static const int NUM_OF_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId) )/ PAIR_SIZE;   /*  1024/12 = 85 node maximum,
-                                                                                                    Constant to check if adding one more
-                                                                                                    pair exceeds 85 node maximum
-                                                                                                */
-
-    char* getBuffer();
-
+    static const int NUM_OF_TOTAL_PAIRS = (PageFile::PAGE_SIZE - sizeof(PageId) )/ PAIR_SIZE;   /*  1024/12 = 85 node maximum */
+                       
+    //Getter for the buffer private data member
+    char* getBuffer();  
+    
     /*
     * Constructor that sets numKeys to 0
     */
@@ -116,7 +114,7 @@ class BTLeafNode {
     /*
     *   Print the keys of the node
     */
-    void print();
+   // void print();
 
   private:
     int numKeys;    /*Number of keys that a leaf can hold*/
@@ -143,6 +141,9 @@ class BTNonLeafNode {
      * Constructor for NONLEAF node; initialize the private variables
      */
     BTNonLeafNode();
+
+    //Getter for the buffer private data member
+    char* getBuffer();  
 
    /**
     * Insert a (key, pid) pair to the node.
@@ -211,7 +212,7 @@ class BTNonLeafNode {
     /**
      * Print the keys of the node to cout
      */
-     void print();
+    // void print();
 
   private:
     int numKeys; /* declare the variables that a NONLEAF must hold */

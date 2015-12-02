@@ -7,6 +7,7 @@ using namespace std;
 
 BTLeafNode::BTLeafNode() {
 	numKeys = 0;
+	fill(buffer, buffer + PageFile::PAGE_SIZE, 0); //clear the buffer initially
 }
 
 //Getter for the buffer private data member
@@ -204,7 +205,6 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 
- //THIS MIGHT NEED FIXING
 RC BTLeafNode::locate(int searchKey, int& eid) {
 	char* tempBuffer = buffer;
 
@@ -214,30 +214,21 @@ RC BTLeafNode::locate(int searchKey, int& eid) {
 		int key;
 		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key inside buffer
 
-		if(key == searchKey) {
-			//eid = current byte index divided by size of a a pair entry
+		//If the key is larger than or equal to the searchKey, set eid
+		if(key >= searchKey) {
+			//eid = current byte index divided by size of a pair entry
 			eid = i/PAIR_SIZE;
 			return 0;
-		} else if(key < searchKey) {	//Jump by PAIR_SIZE and make another comparison
-			eid += PAIR_SIZE;
-		} else {
-			break;
 		}
-
-		// //If the key is larger than or equal to the searchKey, set eid
-		// if(key >= searchKey) {
-		// 	//eid = current byte index divided by size of a pair entry
-		// 	eid = i/PAIR_SIZE;
-		// 	return 0;
-		// }
 
 		tempBuffer += PAIR_SIZE;
 	}
 
-	//If we reach this point, we checked every entry of the node and could not find the searchKey
-	//eid = getKeyCount();
-	return RC_NO_SUCH_RECORD;
+	//If we reach this point, every key inside the buffer was less than the searchKey parameter
+	eid = getKeyCount();
+	return 0;
 }
+
 
 /*
  * Read the (key, rid) pair from the eid entry.
@@ -307,20 +298,25 @@ RC BTLeafNode::setNextNodePtr(PageId pid) {
 /*
  *   Print the keys of the node
 */
-void BTLeafNode::print() {
-	char* tempBuffer = buffer;
-
-	for(int i = 0; i < getKeyCount() * PAIR_SIZE; i += PAIR_SIZE) {
-		int key;
-		memcpy(&key, tempBuffer, sizeof(int));	//Save the current key into temp buffer
-
-		cout << tempBuffer[i] << " ";	//Print out each possible emptyPair
-
-		tempBuffer += PAIR_SIZE;	//tempBuffer jumps to the next key
-	}
-
-	cout << endl;
-}
+ //Testing function
+// void BTLeafNode::print() {
+// 	//This is the size in bytes of an entry pair
+// 	int pairSize = sizeof(RecordId) + sizeof(int);
+	
+// 	char* temp = buffer;
+	
+// 	for(int i=0; i<getKeyCount()*pairSize; i+=pairSize)
+// 	{
+// 		int insideKey;
+// 		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+		
+// 		cout << insideKey << " ";
+		
+// 		temp += pairSize; //Jump temp over to the next key
+// 	}
+	
+// 	cout << "" << endl;
+// }
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -351,6 +347,11 @@ RC BTNonLeafNode::read(PageId pid, const PageFile& pf) {
  */
 RC BTNonLeafNode::write(PageId pid, PageFile& pf) {
   return pf.write(pid, buffer); /*Use PageFile to write from buffer into selected page*/
+}
+
+//Getter for the buffer private data member
+char* BTNonLeafNode::getBuffer() {
+	return buffer;
 }
 
 /*
@@ -606,16 +607,24 @@ RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2) {
 /*
  * Print the keys of the node to cout
  */
-void BTNonLeafNode::print() {
-  /* once again, Nonleaf node: skip first 8 bytes as offset */
-  char* tmp_bufIndex = buffer + 8;
-  int i;
-  /* traverse through and print out insideKey */
-  for (i = 8; i < getKeyCount()*PAIR_SIZE + 8; i += PAIR_SIZE) {
-    int tmp_Key;
-    memcpy(&tmp_Key, tmp_bufIndex, sizeof(int));
-    cout << tmp_Key << " ";
-    tmp_bufIndex += PAIR_SIZE;
-  }
-  cout << "" << endl;
-}
+ //Test function
+// void BTNonLeafNode::print() {
+// 	//This is the size in bytes of an entry pair
+// 	int pairSize = sizeof(PageId) + sizeof(int);
+	
+// 	//Skip the first 8 offset bytes, since there's no key there
+// 	char* temp = buffer+8;
+	
+// 	for(int i=8; i<getKeyCount()*pairSize+8; i+=pairSize)
+// 	{
+// 		int insideKey;
+// 		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
+
+// 		cout << insideKey << " ";
+		
+// 		//Otherwise, searchKey is greater than or equal to insideKey, so we keep checking
+// 		temp += pairSize; //Jump temp over to the next key
+// 	}
+	
+// 	cout << "" << endl;	
+// }
