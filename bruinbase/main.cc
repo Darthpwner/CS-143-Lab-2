@@ -19,7 +19,7 @@
 
 int main()
 {
-	//TESTING PURPOSES
+	//TESTING PURPOSES We ARE ALMOST THERE
   //printf("HELLO WORLD\n");
 
 //   BTreeIndex b;
