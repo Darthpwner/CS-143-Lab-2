@@ -67,76 +67,59 @@ int BTLeafNode::getKeyCount() {
  * @return 0 if successful. Return an error code if the node is full.
  */
 RC BTLeafNode::insert(int key, const RecordId& rid) {
-	//Save last 4 bytes (the pid) for reconstructing the inserted leaf
+	//Store the last 4 bytes (the pid) to rebuild the inserted leaf node later
 	PageId nextNodePtr = getNextNodePtr();
-	
-	//This is the size in bytes of an entry pair
-	int pairSize = sizeof(RecordId) + sizeof(int);
-	
-	//Return error if no more space in this node
-	//Page has 1024 bytes, we need to store 12 bytes (key, rid)
-	//That means we can fit 85 with 4 bytes left over for pid pointer to next leaf node
-	//Check if adding one more (key, rid) pair will exceed the size limit of 85
-	int numTotalPairs = (PageFile::PAGE_SIZE-sizeof(PageId))/pairSize;
-	if(getKeyCount()+1 > numTotalPairs) //if(getKeyCount()+1 > 85)
-	{
-		//cout << "Cannot insert anymore: this node is full!" << endl;
+
+	//Page has 1024 bytes if we need to store 12 bytes (key, rid)
+	//We can fit 1024/12 == 85 with 4 bytes left over
+	if(getKeyCount() + 1 > NUM_OF_TOTAL_PAIRS) {	//Return an error code if the null is full.
 		return RC_NODE_FULL;
 	}
-	
-	//Now we must go through the buffer's sorted keys to see where the new key goes
-	char* temp = buffer;
-	
-	//Loop through all the indexes in the temp buffer; increment by 12 bytes to jump to next key
-	//1008 is the largest possible index of the next inserted pair (since we already know we can fit another pair)
-	
-	int i;
-	for(i=0; i<1008; i+=pairSize)
-	{
-		int insideKey;
-		memcpy(&insideKey, temp, sizeof(int)); //Save the current key inside buffer as insideKey
-		
-		//Once the insideKey is null or key is smaller than some inside key, we stop
-		if(insideKey==0 || !(key > insideKey))
+
+	//Temporary buffer holds the buffer's original stored keys and manipulates how to add a new key.
+	char* tempBuffer = buffer;
+
+	//Otherwise, go through the buffer's keys to see where to store the new node
+	//1008 is the largest index at which we can store a new node since we do not have enough memory at 1020
+	int i = 0;
+	for(; i < LARGEST_INDEX; i += PAIR_SIZE) {
+		int insertKey;
+		memcpy(&insertKey, tempBuffer, sizeof(int));	//Save the insertKey inside tempBuffer
+
+		//If the key at index i for the buffer is NULL or the key is smaller than an inside key, stop execution
+		if(insertKey == 0 || key <= insertKey) {
 			break;
-		
-		temp += pairSize; //Jump temp over to the next key
+		}
+
+		tempBuffer += PAIR_SIZE;	//Jump to the next key in the temporary buffer
 	}
-	
-	//At this point, variable i holds the index to insert the pair and temp is the buffer at that index
-	char* newBuffer = (char*)malloc(PageFile::PAGE_SIZE);
-	std::fill(newBuffer, newBuffer + PageFile::PAGE_SIZE, 0); //clear the buffer if necessary
-	
-	//Copy all values from buffer into newBuffer up until i
+
+	//After we perform our check to see for free space, index i has the appropriate index of where to insert the pair
+	char* newBuffer = (char*) malloc (PageFile::PAGE_SIZE);
+	fill(newBuffer, newBuffer + PageFile::PAGE_SIZE, 0);	//Clear the buffer as appropriate
+
+	//Copy all values from buffer into new Buffer up until i
 	memcpy(newBuffer, buffer, i);
-	
+
 	//Values to insert as new (key, rid) pair
-	PageId pid = rid.pid;
+	PageId pid = rid.sid;
 	int sid = rid.sid;
-	
-	memcpy(newBuffer+i, &key, sizeof(int));
-	memcpy(newBuffer+i+sizeof(int), &rid, sizeof(RecordId));
-	
-	//INCREMENTAL POINTER METHOD:
-	//char* insertPos = newBuffer+i;
-	//memcpy(insertPos, &pid, sizeof(PageId));
-	//insertPos += sizeof(PageId);
-	//memcpy(insertPos, &sid, sizeof(int));
-	//insertPos += sizeof(int);
-	//memcpy(insertPos, &key, sizeof(int));
-	
-	//Copy the rest of the values into newBuffer
-	//Notice that we are neglecting nextNodePtr, so we'll manually copy that in
-	memcpy(newBuffer+i+pairSize, buffer+i, getKeyCount()*pairSize - i);
-	memcpy(newBuffer+PageFile::PAGE_SIZE-sizeof(PageId), &nextNodePtr, sizeof(PageId));
-	
-	//Copy newBuffer into buffer, then delete temporary newBuffer to prevent memory leak
+
+	memcpy(newBuffer + i, &key, sizeof(int));
+	memcpy(newBuffer + i + sizeof(int), &rid, sizeof(RecordId));
+
+	//The remaining memcpy operations will copy the remaining values into newBuffer
+	//Neglecting the results of nextNodePtr. This needs to be manually copied in!
+	memcpy(newBuffer + i + PAIR_SIZE, buffer + i, getKeyCount() * PAIR_SIZE - i);
+	memcpy(newBuffer + PageFile::PAGE_SIZE - sizeof(PageId), &nextNodePtr, sizeof(PageId));
+
+	//Copy the newBuffer into buffer, then delete temporary newBuffer to prevent any memory leaks
 	memcpy(buffer, newBuffer, PageFile::PAGE_SIZE);
 	free(newBuffer);
-	
-	//Successfully inserted leaf node, so we increment number of keys
+
+	//Successively inserted leaf node, so we increment number of keys
 	numKeys++;
-	
+
 	return 0;
 }
 
@@ -222,7 +205,6 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 
- //THIS MIGHT NEED FIXING
 RC BTLeafNode::locate(int searchKey, int& eid) {
 	char* tempBuffer = buffer;
 
